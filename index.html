@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eve's Garden</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+    body {
+      margin: 0; padding: 0; background: #050505; color: #d4c3a8;
+      font-family: 'Cinzel', serif; line-height: 1.8;
+    }
+
+    .scene {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(transparent, rgba(5,5,5,0.85));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .content {
+      max-width: 780px;
+      z-index: 2;
+    }
+
+    h1 {
+      font-size: 4.8rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    }
+
+    .narrative {
+      font-size: 1.55rem;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1.2s ease;
+    }
+
+    .narrative.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .arrow {
+      position: absolute;
+      bottom: 50px;
+      font-size: 3rem;
+      animation: bounce 2s infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes bounce { 50% { transform: translateY(25px); } }
+  </style>
+</head>
+<body>
+
+  <!-- Title -->
+  <div class="scene" style="background: #0a0a0a;">
+    <div class="overlay">
+      <div class="content">
+        <p class= "narrative">Hi, my name is Eve.</p>
+        <div class="arrow">↓ ↓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Garden Description-->
+  <div class="scene">
+    <img src="images/garden.jpg" alt="Garden of Eden" class="background-image">
+    
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">I live in a magical place, full of beautiful birds and land creatures.</p>
+        <p class="narrative">It's a beautiful garden with magical landscapes, golden sunsets that make your eyes tear.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- water gif -->
+  <div class="scene" style="background-image: url('images/water.gif');">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">A beauty made by angelic beings.</p>
+      </div>
+    </div>
+  </div> 
+
+  <!--Garden images-->
+  <img src="images/garden1.jpg" alt="Eve under tree" class="background-image">
+  <img src="images/garden2.jpg" alt="Eve under tree" class="background-image">
+
+  <!-- 3. Eve Under the Tree -->
+  <div class="scene">
+    <img src="images/evesleeping.jpg" alt="Eve under tree" class="background-image">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">Here, I can eat from all trees if I wish... well, not all.<br>But no matter, I have all that I need here.</p>
+      </div>
+    </div>
+  </div>                                        
+
+  <!-- Snake appears -->
+  <div class="scene" style="background-image: url('images/serpent.jpg');"></div>
+
+  <!-- Dialogue -->
+  <div class="scene" style="background-image: url('images/evetalkingtosnake.jpg');">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">A strange creature came to me one day, and it said strange things to me.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" style="background: #111;">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">"Eat the fruit and you will become like God."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" style="background: #111;">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative" style="font-family: 'Playfair Display', serif; font-style: italic;">
+          God said that we will die if we eat of it.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" style="background: #111;">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">"God doesn't want you to be like him.<br>Eat and you shall know the wonders of the world."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apples -->
+  <div class="scene" style="background-image: url('images/forbiddentree.jpg');"></div>
+
+  <!-- Eve picking the apple + Choice -->
+  <div class="scene" style="background-image: url('images/pickingapple.jpg');">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative" style="margin-bottom: 50px;">Should I eat the fruit?</p>
+        
+        <button onclick="eatApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #b38b5d; color: #d4c3a8; cursor: pointer;">
+          Eat the Apple
+        </button>
+        <button onclick="dontEat()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #b38b5d; color: #d4c3a8; cursor: pointer;">
+          Don't Eat the Apple
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Animate narratives as they enter viewport
+    document.querySelectorAll('.narrative').forEach((text, i) => {
+      gsap.to(text, {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        scrollTrigger: {
+          trigger: text,
+          start: "top 70%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    });
+
+    function eatApple() {
+      alert("🌿 You ate the apple... The world opens up.\n\nWe will continue the story from here with your links.");
+    }
+
+    function dontEat() {
+      alert("You remained in innocence.\nThe Garden stays beautiful... but limited.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
