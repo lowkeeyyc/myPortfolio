@@ -36,6 +36,40 @@
       padding: 0 20px;
     }
 
+    /* === SPECIAL ZOOM SECTION === */
+    .zoom-section {
+      height: 300vh; /* Makes it taller so scroll has more room */
+      position: relative;
+      overflow: hidden;
+    }
+
+    .zoom-image {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.3); /* Starts zoomed in */
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Snake Scene - Special Effect */
+    #snake-scene {
+      background-color: #050505;
+      overflow: hidden;
+    }
+
+    #snake-image {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120%;
+      height: auto;
+      opacity: 0.9;
+      transition: transform 0.1s linear;
+      z-index: 2;
+    }
+
     .content {
       max-width: 780px;
       z-index: 2;
@@ -88,86 +122,148 @@
     
     <div class="overlay">
       <div class="content">
-        <p class="narrative">I live in a magical place, full of beautiful birds and land creatures.</p>
-        <p class="narrative">It's a beautiful garden with magical landscapes, golden sunsets that make your eyes tear.</p>
+        <p class="narrative">I live in a beautiful garden with magical landscapes and golden sunsets that make your eyes tear.</p>
       </div>
     </div>
   </div>
+  <div class="scene" style="background-color: #050505;"></div>
 
   <!-- water gif -->
   <div class="scene" style="background-image: url('images/water.gif');">
     <div class="overlay">
       <div class="content">
-        <p class="narrative">A beauty made by angelic beings.</p>
+        <p class="narrative">Where rivers flow</p>
       </div>
     </div>
   </div> 
+  <div class="scene" style="background-color: #050505;"></div>
 
   <!--Garden images-->
-  <img src="images/garden1.jpg" alt="Eve under tree" class="background-image">
-  <img src="images/garden2.jpg" alt="Eve under tree" class="background-image">
+  <section class="zoom-section" id="zoom-section">
+    <div class="zoom-image" id="zoomImage" 
+         style="background-image: url('images/sunrise.jpg');">
+         <div class="overlay">
+            <div class="content">
+              <p class="narrative">and flowers bloom.</p>
+            </div>
+         </div>
+    </div>
+  </section> 
 
   <!-- 3. Eve Under the Tree -->
   <div class="scene">
     <img src="images/evesleeping.jpg" alt="Eve under tree" class="background-image">
     <div class="overlay">
       <div class="content">
-        <p class="narrative">Here, I can eat from all trees if I wish... well, not all.<br>But no matter, I have all that I need here.</p>
+        <p class="narrative">Here, I have all that I need.</p>
+        <p class="narrative">All I can wish for.</p>
       </div>
     </div>
-  </div>                                        
+  </div>                                    
+
+  <div class="scene" style="background-color: #050505;">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">A strange creature came to me one day.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- Snake appears -->
-  <div class="scene" style="background-image: url('images/serpent.jpg');"></div>
+  <div id="snake-scene" class="scene">
+    <img id="snake-image" src="images/slitheringsnake.gif" alt="Serpent">
+  </div>
 
-  <!-- Dialogue -->
-  <div class="scene" style="background-image: url('images/evetalkingtosnake.jpg');">
+  <div class="scene" style="background-color: #050505;">
     <div class="overlay">
       <div class="content">
-        <p class="narrative">A strange creature came to me one day, and it said strange things to me.</p>
+        <p class="narrative">It said strange things to me.</p>
       </div>
     </div>
   </div>
 
-  <div class="scene" style="background: #111;">
+  <div>
+    <img src="images/evesleeping.jpg" alt="evesleeping" style="max-width: 45%;">
+    <img src="images/serpenttalking.gif" alt="serpenttalking" style="right: 0;">
+    <p class="narrative"> Wake up, Eve</p>
+    <img src="images/eveawake.jpg" alt="eveawake" style="max-width: 45%;">
+    
+  </div>
+  
+
+  <div class="scene" style="background: linear-gradient(to bottom, 
+        #050505 40%, 
+        #6b9eeb 100%
+      );">
     <div class="overlay">
       <div class="content">
-        <p class="narrative">"Eat the fruit and you will become like God."</p>
+        <p class="narrative">"Did God really say, You must not eat from any tree in the garden? "</p>
       </div>
     </div>
   </div>
 
-  <div class="scene" style="background: #111;">
+  <section class="zoom-section" id="zoom-section">
+    <div class="zoom-image" id="zoomImage" 
+         style="background-image: url('images/forbiddentree.jpg');">
+         <div class="overlay">
+            <div class="content">
+              <p class="narrative" style="font-family: 'Playfair Display', serif; font-style: italic;">
+                I said,
+              </p>  
+              <p class="narrative" style="font-family: 'Playfair Display', serif; font-style: italic;">
+                We may eat fruit from the trees in the garden, but God did say, 'You must not eat
+                fruit from the tree that is in the middle of the garden and you must not touch it,'
+              </p>
+            </div>
+         </div>
+    </div>
+  </section> 
+
+  <div class="scene" style="background: linear-gradient(to bottom, 
+        #0a0a0a 0%, 
+        #310103 45%, 
+        #e00404 100%
+      );">
     <div class="overlay">
       <div class="content">
         <p class="narrative" style="font-family: 'Playfair Display', serif; font-style: italic;">
-          God said that we will die if we eat of it.
+          'or you will die'
         </p>
       </div>
     </div>
   </div>
 
-  <div class="scene" style="background: #111;">
+  <div class="scene" style="background-color: #290203;">
     <div class="overlay">
       <div class="content">
-        <p class="narrative">"God doesn't want you to be like him.<br>Eat and you shall know the wonders of the world."</p>
+        <p class="narrative">"You will not certainly die," he said,<br>
+          "For God knows that when you eat from it
+          your eyes will be opened, and you will be like God, knowing good and evil."</p>
       </div>
     </div>
   </div>
 
   <!-- Apples -->
-  <div class="scene" style="background-image: url('images/forbiddentree.jpg');"></div>
-
-  <!-- Eve picking the apple + Choice -->
-  <div class="scene" style="background-image: url('images/pickingapple.jpg');">
+  <div class="scene" style="background-image: url('images/apple.gif');">
     <div class="overlay">
       <div class="content">
-        <p class="narrative" style="margin-bottom: 50px;">Should I eat the fruit?</p>
+        <p class="narrative">Good and Evil</p>
+        <p class="narrative">Know</p>
+        <p class="narrative">Good and Evil</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Eve picking the apple + Choice -->
+  <div class="scene">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative" style="margin-bottom: 50px;">Should I eat the Apple, and know what good and evil is?</p>
         
-        <button onclick="eatApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #b38b5d; color: #d4c3a8; cursor: pointer;">
+        <button onclick="eatApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
           Eat the Apple
         </button>
-        <button onclick="dontEat()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #b38b5d; color: #d4c3a8; cursor: pointer;">
+        <button onclick="dontEat()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
           Don't Eat the Apple
         </button>
       </div>
@@ -191,6 +287,43 @@
       });
     });
 
+    // Zoom Effect on Scroll
+    const zoomImage = document.getElementById('zoomImage');
+    
+    window.addEventListener('scroll', () => {
+      const section = document.getElementById('zoom-section');
+      const rect = section.getBoundingClientRect();
+      
+      // Calculate how far we've scrolled through this section
+      const scrollProgress = Math.max(0, Math.min(1, 
+        (window.scrollY - section.offsetTop) / (section.offsetHeight - window.innerHeight)
+      ));
+      
+      // Zoom from 1.3 (zoomed in) to 1.0 (full image)
+      const scale = 1.3 - (scrollProgress * 0.3);
+      zoomImage.style.transform = `scale(${scale})`;
+    });
+
+    // Snake Slide Effect
+    const snakeImage = document.getElementById('snake-image');
+
+    window.addEventListener('scroll', () => {
+      const rect = snakeImage.getBoundingClientRect();
+      const sectionTop = rect.top;
+      const triggerPoint = window.innerHeight * 0.35; // Snake starts moving only when section is well in view
+
+      if (sectionTop < triggerPoint) {
+        const scrollPast = Math.max(0, triggerPoint - sectionTop);
+        const progress = Math.min(1, scrollPast / (window.innerHeight * 0.65)); // Slower, more controlled movement
+        
+        const moveX = progress * 1100;           // How far it slides
+        const opacity = Math.max(0.05, 1 - progress * 1.4);
+        
+        snakeImage.style.transform = `translateY(-50%) translateX(${moveX}px)`;
+        snakeImage.style.opacity = opacity;
+      }
+    });
+
     function eatApple() {
       alert("🌿 You ate the apple... The world opens up.\n\nWe will continue the story from here with your links.");
     }
@@ -199,6 +332,7 @@
       alert("You remained in innocence.\nThe Garden stays beautiful... but limited.");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
   </script>
 </body>
 </html>
