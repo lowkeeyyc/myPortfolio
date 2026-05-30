@@ -101,6 +101,49 @@
       opacity: 0.6;
     }
 
+    .section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      scroll-snap-align: start;
+    }
+
+    .pure-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: linear-gradient(#0f1a0f, #0a120a);
+    }
+
+    /* Carousel */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 40px 0;
+      scroll-behavior: smooth;
+      max-width: 1000px;
+      margin: 40px auto;
+    }
+
+    .carousel img {
+      height: 420px;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      flex-shrink: 0;
+      transition: transform 0.4s;
+    }
+
+    .carousel img:hover {
+      transform: scale(1.05);
+    }
+
     @keyframes bounce { 50% { transform: translateY(25px); } }
   </style>
 </head>
@@ -183,9 +226,9 @@
   </div>
 
   <div>
-    <img src="images/evesleeping.jpg" alt="evesleeping" style="max-width: 45%;">
-    <img src="images/serpenttalking.gif" alt="serpenttalking" style="right: 0;">
     <p class="narrative"> Wake up, Eve</p>
+    <img src="images/eveasleep.jpeg" alt="evesleeping" style="max-width: 45%;">
+    <img src="images/serpenttalking.gif" alt="serpenttalking" style="right: 0;">
     <img src="images/eveawake.jpg" alt="eveawake" style="max-width: 45%;">
     
   </div>
@@ -248,27 +291,67 @@
     <div class="overlay">
       <div class="content">
         <p class="narrative">Good and Evil</p>
-        <p class="narrative">Know</p>
+        <p class="narrative">I'll Know</p>
         <p class="narrative">Good and Evil</p>
       </div>
     </div>
   </div>
   
-  <!-- Eve picking the apple + Choice -->
-  <div class="scene">
+  <!--Choice Scene -->
+  <div id="choice-scene" class="scene">
     <div class="overlay">
       <div class="content">
-        <p class="narrative" style="margin-bottom: 50px;">Should I eat the Apple, and know what good and evil is?</p>
+        <p class="narrative" style="margin-bottom: 50px;">What do you think I did? </p>
         
-        <button onclick="eatApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
-          Eat the Apple
+        <button class="choice-btn" onclick="eatApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          I ate the Apple
         </button>
-        <button onclick="dontEat()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
-          Don't Eat the Apple
+        <button class="choice-btn" onclick="dontEatApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          I didn't eat the Apple
         </button>
       </div>
     </div>
   </div>
+
+  <!-- DON'T EAT THE APPLE - PURE PATH -->
+  <section id="pure-path" class="pure-section" style="display: none;">
+    <div class="content">
+      <h1>I Remained Pure</h1>
+      <p class="narrative">I chose not to eat the fruit.</p>
+      <p class="narrative">In that gentle refusal, I remained in my pure state of consciousness.</p>
+      <p class="narrative">Untouched by doubt. Unburdened by forbidden knowledge.</p>
+      <p class="narrative">The Garden stayed golden. The flowers continued their eternal song.</p>
+    </div>
+  </section>
+
+  <section id="pure-path-2" class="pure-section" style="display: none;">
+    <img src="images/lastgarden.jpg" alt="Garden of Eden" class="background-image">
+    <div class="content">
+      <h1>Come, Walk With Me</h1>
+      <p class="narrative">Let me show you the beauty I see every day.</p>
+      <p class="narrative">Moments I captured in my peaceful paradise.</p>
+    </div>
+  </section>
+
+  <!-- Carousel -->
+  <section id="pure-path-3" class="pure-section" style="display: none; background: #0a120a;">
+    <div class="content">
+      <h1>Fragments of Paradise</h1>
+      <div class="carousel" id="pinterest-carousel"></div>
+    </div>
+  </section>
+
+  <!-- Final Link -->
+  <section id="pure-path-4" class="pure-section" style="display: none;">
+    <div class="content">
+      <h1>This is my Garden</h1>
+      <p class="narrative">A living gallery of beauty, peace, and wonder.</p>
+      <a href="https://pin.it/7xXMByOL8" target="_blank" 
+         style="display: inline-block; margin-top: 40px; padding: 22px 70px; border: 2px solid #b38b5d; color: #d4c3a8; text-decoration: none; font-size: 1.5rem;">
+        Explore My Full Pinterest Garden →
+      </a>
+    </div>
+  </section>
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
@@ -328,10 +411,44 @@
       alert("🌿 You ate the apple... The world opens up.\n\nWe will continue the story from here with your links.");
     }
 
-    function dontEat() {
-      alert("You remained in innocence.\nThe Garden stays beautiful... but limited.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function dontEatApple() {
+      // Hide choice scene
+      document.getElementById('choice-scene').style.display = 'none';
+      
+      // Show pure path sections
+      document.getElementById('pure-path').style.display = 'flex';
+      document.getElementById('pure-path-2').style.display = 'flex';
+      document.getElementById('pure-path-3').style.display = 'flex';
+      document.getElementById('pure-path-4').style.display = 'flex';
+
+      // Smooth scroll to the pure path
+      setTimeout(() => {
+        document.getElementById('pure-path').scrollIntoView({ 
+          behavior: "smooth" 
+        });
+      }, 300);
     }
+
+    // Create Carousel with your Pinterest vibe
+    function createCarousel() {
+      const carousel = document.getElementById('pinterest-carousel');
+      const images = [
+        "https://i.pinimg.com/736x/50/f7/c6/50f7c67a368124079a2e65b53fca3105.jpg",
+        "https://i.pinimg.com/736x/a4/13/1d/a4131d1d913309900d9129ca3f590fb0.jpg",
+        "https://i.pinimg.com/736x/4b/3f/b4/4b3fb4197df441314ee45bacc9c8274c.jpg",
+        "https://i.pinimg.com/736x/9b/b0/35/9bb035d585f7f5414f776621d7f6c8ee.jpg",
+        "https://i.pinimg.com/736x/74/04/16/740416c2f418178ecb6c5fc134024036.jpg",
+        "https://i.pinimg.com/736x/78/28/bc/7828bc01ae43f0c8dbbaf0812631168e.jpg"
+      ];
+
+      images.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        carousel.appendChild(img);
+      });
+    }
+
+    window.onload = createCarousel;
 
   </script>
 </body>
