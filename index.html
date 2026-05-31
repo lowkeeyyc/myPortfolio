@@ -6,6 +6,7 @@
   <title>Eve's Garden</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cinzel:wght@400;600&display=swap');
 
@@ -172,14 +173,14 @@
   <div class="scene" style="background-color: #050505;"></div>
 
   <!-- water gif -->
-  <div class="scene" style="background-image: url('images/water.gif');">
+  <section class="scene" style="background-image: url('images/water.gif');">
     <div class="overlay">
       <div class="content">
         <p class="narrative">Where rivers flow</p>
       </div>
     </div>
-  </div> 
-  <div class="scene" style="background-color: #050505;"></div>
+  </section>     
+  <section class="scene" style="background-image: url('images/water.gif'); transform: rotate(180deg);"></section>
 
   <!--Garden images-->
   <section class="zoom-section" id="zoom-section">
@@ -313,46 +314,153 @@
     </div>
   </div>
 
-  <!-- DON'T EAT THE APPLE - PURE PATH -->
-  <section id="pure-path" class="pure-section" style="display: none;">
+  <!-- ==================== EAT THE APPLE BRANCH ==================== -->
+
+  <!-- 11. Did I Die? -->
+  <section id="eat-branch-1" class="section" style="background:#111; display:none;">
     <div class="content">
-      <h1>I Remained Pure</h1>
-      <p class="narrative">I chose not to eat the fruit.</p>
-      <p class="narrative">In that gentle refusal, I remained in my pure state of consciousness.</p>
-      <p class="narrative">Untouched by doubt. Unburdened by forbidden knowledge.</p>
-      <p class="narrative">The Garden stayed golden. The flowers continued their eternal song.</p>
+      <h1>Did I die?</h1>
+      <div class="choice-container">
+        <button class="choice-btn" onclick="choseDied()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          I Died
+        </button>
+        <button class="choice-btn" onclick="choseDidntDie()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          I Didn't Die
+        </button>
+      </div>
     </div>
   </section>
 
+  <!-- 12A. I Died Branch (Memes + Film Analysis) -->
+  <section id="died-branch" class="section" style="background:#1a0000; display:none;">
+    <div class="content">
+      <h1>Really?</h1>
+      <p class="narrative">Have you never heard this story before?</p>
+      <p class="narrative">Okay maybe you just chose this to see what will pop up. Or maybe you just 
+        like doing things differently. 'clock it'. So for your effort, I'll give you a link to my youtube
+        channel where I use my love for films and also my boredom to analyse films. If you are a cinephile
+        I think you'll love this. 
+      </p>
+      <!-- Add your meme images here later -->
+      <button class="choice-btn" onclick="goToAnalysis()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+        Watch My Film Analysis
+      </button>
+      <p class="narrative">Now let's go back to the actual story.</p>
+      <button class="choice-btn" onclick="choseDidntDie()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+        I Didn't Die
+      </button>
+    </div>
+  </section>
+
+  <!-- 12B. I Didn't Die Branch -->
+  <section id="didnt-die-branch" class="section" style="background-image: url('https://picsum.photos/id/1015/1920/1080'); display:none;">
+    <div class="content">
+      <h1>I Didn't Die</h1>
+      <p class="narrative">The fruit did not kill me.</p>
+      <p class="narrative">In that moment I realized... God had lied to me.</p>
+      
+      <div class="choice-container" style="margin-top:80px;">
+        <button class="choice-btn" onclick="continueAfterApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          Continue
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. The Fall into Reality -->
+  <section id="reality-branch" class="section" style="background-image: url('https://picsum.photos/id/201/1920/1080'); display:none;">
+    <div class="content">
+      <h1>The Garden Changed</h1>
+      <p class="narrative">I became filled with a sadness I never knew existed.</p>
+      <p class="narrative">Suddenly the garden was no longer paradise.</p>
+      <p class="narrative">There was poop everywhere. Mosquitoes biting my skin. And worst of all... I was naked.</p>
+      <p class="narrative">The apple had opened my eyes to Good and Evil.</p>
+      <p class="narrative">And in this knowledge, I received poetry — a language to express the dualism of this world.</p>
+      
+      <div class="choice-container">
+        <button class="choice-btn" onclick="eatPoetryApple()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          Eat of This Fruit
+        </button>
+        <button class="choice-btn" onclick="nextChapter()" style="padding: 20px 60px; font-size: 1.5rem; margin: 15px; background: transparent; border: 2px solid #f50b0b; color: #d4c3a8; cursor: pointer;">
+          I Don't Want It
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DON'T EAT THE APPLE - PURE PATH -->
+  <section id="pure-path" class="pure-section" style="display: none;">
+    <div class="content">
+      <h1>I didn't eat the apple</h1>
+      <p class="narrative">Because,</p>
+    </div>
+  </section>
   <section id="pure-path-2" class="pure-section" style="display: none;">
+    <div class="overlay">
+      <div class="content">
+        <p class="narrative">I don't want to die.</p>
+      </div>
+    </div>
+  </section>
+  <section id="pure-path-3" class="pure-section" style="display: none; background: #0a120a;">
+    <div class="content">
+      <p class="narrative">I don't want to sacrifice my Being for knowledge. <br> I prioritize sensation over intellect.</p>
+      <p class="narrative">I don't want to know Good and Evil. I don't want to separate all the parts of myself,
+        and turn them into concepts of morality. I don't want to be black. I don't want to be white.
+      </p>
+      <p class="narrative">I don't want to know what's Good and what's Evil. Because,</p>
+      <p class="narrative">Those words don't exist.</p>
+    </div>
+  </section>
+
+  <section id="pure-path-4" class="pure-section" style="display: none;">
     <img src="images/lastgarden.jpg" alt="Garden of Eden" class="background-image">
     <div class="content">
-      <h1>Come, Walk With Me</h1>
-      <p class="narrative">Let me show you the beauty I see every day.</p>
-      <p class="narrative">Moments I captured in my peaceful paradise.</p>
+      <h1>Good and Evil doesn't exist in my paradise</h1>
+    </div>
+  </section>
+  <section id="pure-path-5" class="pure-section" style="display: none;">
+    <div class="content">
+      <p class="narrative">When I refused to eat the apple, the snake tried to persuade me again, but I couldn't
+      hear what it was saying. My eyes were too busy looking at the sky. The snake then realized that I have no desire
+      to be like God. For I already am God.</p>
+    </div>
+  </section>
+  <section id="pure-path-6" class="pure-section" style="display: none;">
+    <div class="content">
+      <p class="narrative">And it went away, living me in my pure state of consciousness. 
+      Living me in the now.</p>
     </div>
   </section>
 
   <!-- Carousel -->
-  <section id="pure-path-3" class="pure-section" style="display: none; background: #0a120a;">
+  <section id="pure-path-7" class="pure-section" style="display: none; background: #0a120a;">
     <div class="content">
+      <p class="narrative"> So let me show you my paradise, and how I live in it.</p>
       <h1>Fragments of Paradise</h1>
       <div class="carousel" id="pinterest-carousel"></div>
     </div>
   </section>
 
-  <!-- Final Link -->
-  <section id="pure-path-4" class="pure-section" style="display: none;">
-    <div class="content">
-      <h1>This is my Garden</h1>
+  <!-- Final Paradise Section with Petals -->
+  <section id="pure-path-8" class="pure-section" style="display: none; position: relative; overflow: hidden;">
+    <div id="petals-container" style="position: absolute; inset: 0; z-index: 1;"></div>
+    
+    <div class="content" style="z-index: 2; position: relative;">
+      <h1>This is my Paradise</h1>
       <p class="narrative">A living gallery of beauty, peace, and wonder.</p>
       <a href="https://pin.it/7xXMByOL8" target="_blank" 
-         style="display: inline-block; margin-top: 40px; padding: 22px 70px; border: 2px solid #b38b5d; color: #d4c3a8; text-decoration: none; font-size: 1.5rem;">
-        Explore My Full Pinterest Garden →
+        style="display: inline-block; margin-top: 40px; padding: 22px 70px; border: 2px solid #b38b5d; color: #faf8f4; text-decoration: none; font-size: 1.5rem;">
+        Pinterest Paradise →
       </a>
+      <!--Try the Other Path -->
+      <button onclick="returnToChoice()" 
+        style="display: inline-block; margin-top: 40px; padding: 22px 70px; border: 2px solid #b38b5d; text-decoration: none; font-size: 1.5rem;">
+        What if I had tasted the Apple?
+      </button>
     </div>
   </section>
-
+  
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
@@ -407,12 +515,85 @@
       }
     });
 
+    // Beautiful Floating Petals
+    function initPetals() {
+      tsParticles.load("petals-container", {
+        particles: {
+          number: { value: 70 },
+          color: { 
+            value: ["#ff9ecf", "#ff6b9d", "#c9a66b", "#ffccaa", "#98fb98", "#ffd700"] 
+          },
+          shape: { 
+            type: "character",
+            character: {
+              value: ["🌸", "🌺", "🍃", "🕊️", "🌷"],
+              font: "serif",
+              style: "",
+              weight: "400"
+            }
+          },
+          opacity: { value: { min: 0.5, max: 0.9 }, random: true },
+          size: { value: { min: 14, max: 32 }, random: true },
+          move: {
+            enable: true,
+            speed: { min: 0.4, max: 1.8 },
+            direction: "none",
+            random: true,
+            straight: false,
+            outModes: "out"
+          },
+          rotate: {
+            value: { min: 0, max: 360 },
+            random: true,
+            animation: { enable: true, speed: 6 }
+          },
+          tilt: {
+            enable: true,
+            value: { min: 0, max: 25 },
+            animation: { enable: true, speed: 4 }
+          }
+        },
+        background: { color: "#00000000" },
+        detectRetina: true
+      });
+    }
+
+   
     function eatApple() {
-      alert("🌿 You ate the apple... The world opens up.\n\nWe will continue the story from here with your links.");
+      document.getElementById('choice-scene').style.display = 'none';
+      document.getElementById('eat-branch-1').style.display = 'flex';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+    function choseDied() {
+      document.getElementById('eat-branch-1').style.display = 'none';
+      document.getElementById('died-branch').style.display = 'flex';
+    }
+
+    function choseDidntDie() {
+      document.getElementById('eat-branch-1').style.display = 'none';
+      document.getElementById('didnt-die-branch').style.display = 'flex';
+    }
+
+    function continueAfterApple() {
+      document.getElementById('didnt-die-branch').style.display = 'none';
+      document.getElementById('reality-branch').style.display = 'flex';
+    }
+
+    function eatPoetryApple() {
+      window.open('https://www.instagram.com/YOUR-INSTAGRAM-USERNAME/', '_blank');
+    }
+
+    function goToAnalysis() {
+      window.open('https://www.youtube.com/YOUR-ANALYSIS-CHANNEL', '_blank');
+    }
+
+    function nextChapter() {
+      alert("Continuing to the next chapter of the story...");
+      // We'll build the next branch here later
     }
 
     function dontEatApple() {
-      // Hide choice scene
+      // Hide choice
       document.getElementById('choice-scene').style.display = 'none';
       
       // Show pure path sections
@@ -420,13 +601,20 @@
       document.getElementById('pure-path-2').style.display = 'flex';
       document.getElementById('pure-path-3').style.display = 'flex';
       document.getElementById('pure-path-4').style.display = 'flex';
+      document.getElementById('pure-path-5').style.display = 'flex';
+      document.getElementById('pure-path-6').style.display = 'flex';
+      document.getElementById('pure-path-7').style.display = 'flex';
+      document.getElementById('pure-path-8').style.display = 'flex';
 
-      // Smooth scroll to the pure path
+      // Scroll to beginning of pure path
       setTimeout(() => {
-        document.getElementById('pure-path').scrollIntoView({ 
-          behavior: "smooth" 
-        });
-      }, 300);
+        document.getElementById('pure-path').scrollIntoView({ behavior: "smooth" });
+      }, 400);
+
+      // Initialize petals AFTER the section is visible
+      setTimeout(() => {
+        initPetals();
+      }, 1200);
     }
 
     // Create Carousel with your Pinterest vibe
@@ -449,6 +637,28 @@
     }
 
     window.onload = createCarousel;
+
+    function returnToChoice() {
+      // Hide all pure path sections
+      document.getElementById('pure-path').style.display = 'none';
+      document.getElementById('pure-path-2').style.display = 'none';
+      document.getElementById('pure-path-3').style.display = 'none';
+      document.getElementById('pure-path-4').style.display = 'none';
+      document.getElementById('pure-path-5').style.display = 'none';
+      document.getElementById('pure-path-6').style.display = 'none';
+      document.getElementById('pure-path-7').style.display = 'none';
+      document.getElementById('pure-path-8').style.display = 'none';
+      
+      // Show choice scene again
+      document.getElementById('choice-scene').style.display = 'flex';
+      
+      // Scroll back to top of choice scene smoothly
+      setTimeout(() => {
+        document.getElementById('choice-scene').scrollIntoView({ 
+          behavior: "smooth" 
+        });
+      }, 100);
+    }
 
   </script>
 </body>
