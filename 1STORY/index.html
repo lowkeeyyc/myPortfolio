@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Awakening in the Ruins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      background: #0a0a0a;
+      color: #d8d0c4;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ========== PROGRESS ========== */
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #8a7a6a, #c9b8a0);
+      width: 0%;
+      z-index: 200;
+      transition: width 0.08s linear;
+    }
+
+    /* ========== FULL-SCREEN SCENE ========== */
+    .scene {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Layer system for depth */
+    .layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .bg-layer {
+      z-index: 1;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: brightness(0.55) contrast(1.15) saturate(0.7);
+      transform: scale(1.05);
+      transition: transform 0.1s linear;
+    }
+
+    .mid-layer {
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .mid-layer img {
+      max-width: 70%;
+      max-height: 75vh;
+      object-fit: contain;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+      opacity: 0;
+      transform: translateY(40px) scale(0.97);
+      transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .mid-layer img.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Text layer */
+    .text-layer {
+      position: relative;
+      z-index: 10;
+      max-width: 620px;
+      padding: 0 6vw;
+      text-align: center;
+    }
+
+    /* ========== TYPOGRAPHY ========== */
+    .internal {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+      color: #c9b8a0;
+      letter-spacing: 0.02em;
+      line-height: 1.85;
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .internal.visible {
+      opacity: 0.95;
+      transform: translateY(0);
+    }
+
+    .dialogue {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 1.7;
+      margin: 0.6em 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .dialogue.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delilah { color: #d4a5a5; }
+    .leila   { color: #a8c5d4; }
+
+    .title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      letter-spacing: 0.12em;
+      color: #e8e0d5;
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .title.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .subtitle {
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      font-size: 0.95rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #8a7a6a;
+      opacity: 0;
+      transition: opacity 1.6s ease 0.3s;
+    }
+    .subtitle.visible { opacity: 0.8; }
+
+    /* ========== SPECIAL EFFECTS ========== */
+    /* Soft floating */
+    .float {
+      animation: float 8s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    /* Subtle tilt on intense moments */
+    .tilt {
+      transition: transform 0.4s ease;
+    }
+    .tilt.active {
+      transform: rotate(-1.2deg) scale(1.02);
+    }
+
+    /* Shake for confrontation */
+    .shake {
+      animation: none;
+    }
+    .shake.active {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-3px); }
+      40%, 60% { transform: translateX(3px); }
+    }
+
+    /* Light beam for awakening */
+    .light-beam {
+      position: absolute;
+      top: 0;
+      right: -10%;
+      width: 55%;
+      height: 100%;
+      background: radial-gradient(ellipse at 70% 40%, rgba(255, 220, 170, 0.12) 0%, transparent 65%);
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+    .light-beam.visible { opacity: 1; }
+
+    /* Sumi-e atmosphere overlays */
+    .ink-wash {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.45) 100%);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Caption under images */
+    .caption {
+      position: absolute;
+      bottom: 6vh;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #6a5e52;
+      z-index: 15;
+      opacity: 0;
+      transition: opacity 1s ease 0.4s;
+    }
+    .caption.visible { opacity: 0.7; }
+
+    /* Final lines */
+    .final-line {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      letter-spacing: 0.08em;
+      color: #c9b8a0;
+      margin: 0.8rem 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1.2s ease;
+    }
+    .final-line.visible {
+      opacity: 0.95;
+      transform: translateY(0);
+    }
+
+    /* Mobile */
+    @media (max-width: 700px) {
+      .mid-layer img { max-width: 88%; max-height: 55vh; }
+      .text-layer { padding: 0 5vw; }
+      .scene { height: auto; min-height: 100vh; padding: 12vh 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress"></div>
+
+  <!-- ========== INTRO ========== -->
+  <section class="scene" id="intro">
+    <div class="layer bg-layer" style="background-image: url('images/bg-dark-texture.jpg');"></div>
+    <div class="ink-wash"></div>
+    <div class="text-layer">
+      <h1 class="title">Awakening in the Ruins</h1>
+      <p class="subtitle">A story told in light and silence</p>
+    </div>
+  </section>
+
+  <!-- ========== KITCHEN ========== -->
+  <section class="scene" id="kitchen">
+    <div class="layer bg-layer" style="background-image: url('images/bg-kitchen-dark.jpg');"></div>
+    <div class="ink-wash"></div>
+
+    <div class="layer mid-layer">
+      <img src="images/01-leila-washing-cup.jpg" alt="Leila washing a cup" class="float" data-speed="0.15">
+    </div>
+
+    <div class="text-layer">
+      <p class="internal">
+        Me? Do it? No I... I possibly could not.<br>
+        Even though I want to... I can't, I'm not strong enough...<br><br>
+        Wow, this is embarrassing...<br>
+        Oh dear, these won't be enough will they?
+      </p>
+    </div>
+    <p class="caption">The last scones • The empty cabinets</p>
+  </section>
+
+  <!-- ========== BEDROOM ========== -->
+  <section class="scene" id="bedroom">
+    <div class="layer bg-layer" style="background-image: url('images/bg-bedroom.jpg');"></div>
+    <div class="ink-wash"></div>
+
+    <div class="layer mid-layer">
+      <img src="images/03-delilah-portrait.jpg" alt="Delilah" data-speed="0.12">
+    </div>
+
+    <div class="text-layer">
+      <p class="dialogue delilah">What took you so long?</p>
+      <p class="dialogue leila">I was waiting for the kettle to boil the water.</p>
+      <p class="dialogue delilah">Does this have sugar?</p>
+      <p class="dialogue leila">YES! Two tablespoons. One of coffee.</p>
+      <p class="dialogue delilah">Why do these scones not have jelly on them?</p>
+      <p class="dialogue leila">We ran out of jelly.</p>
+    </div>
+    <p class="caption">Delilah</p>
+  </section>
+
+  <!-- ========== ARGUMENT ========== -->
+  <section class="scene" id="argument">
+    <div class="layer bg-layer" style="background-image: url('images/bg-dark-texture.jpg');"></div>
+    <div class="ink-wash"></div>
+
+    <div class="text-layer">
+      <p class="dialogue leila">Maybe I should find a job... to at least put food on the table?</p>
+      <p class="dialogue delilah" style="font-size: 1.35rem; letter-spacing: 0.05em;">HAHAHAHAHAHAHAHAHA!</p>
+      <p class="dialogue delilah">YOU? WORK? Can you even look someone in the eyes?</p>
+    </div>
+  </section>
+
+  <!-- ========== AWAKENING ========== -->
+  <section class="scene" id="awakening">
+    <div class="layer bg-layer" style="background-image: url('images/bg-kitchen-light.jpg');"></div>
+    <div class="light-beam"></div>
+    <div class="ink-wash"></div>
+
+    <div class="layer mid-layer">
+      <img src="images/06-ladybug.jpg" alt="Ladybug" class="float" data-speed="0.08">
+    </div>
+
+    <div class="text-layer">
+      <p class="internal">
+        I'm talking to myself... there's no one here...<br>
+        There's nothing happening now...<br>
+        I'm just imagining it.
+      </p>
+    </div>
+    <p class="caption">The first real thing</p>
+  </section>
+
+  <!-- ========== BODY AWARENESS ========== -->
+  <section class="scene" id="awareness">
+    <div class="layer bg-layer" style="background-image: url('images/bg-window-light.jpg');"></div>
+    <div class="light-beam visible"></div>
+    <div class="ink-wash"></div>
+
+    <div class="layer mid-layer">
+      <img src="images/07-leila-in-light.jpg" alt="Leila in the light" data-speed="0.1">
+    </div>
+
+    <div class="text-layer">
+      <p class="internal">
+        She notices the faded white wood.<br>
+        The black kettle.<br>
+        Her own hands.<br>
+        The light.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== CONFRONTATION ========== -->
+  <section class="scene" id="confrontation">
+    <div class="layer bg-layer" style="background-image: url('images/bg-bedroom-dark.jpg');"></div>
+    <div class="ink-wash"></div>
+
+    <div class="layer mid-layer">
+      <img src="images/08-pillow.jpg" alt="The pillow" class="tilt" data-speed="0.05">
+    </div>
+
+    <div class="text-layer">
+      <p class="dialogue leila" style="font-size: 1.3rem;">I'm leaving!</p>
+      <p class="dialogue delilah">Not this again!</p>
+      <p class="dialogue leila">I finally understand what you meant...<br>It was all in my head.</p>
+    </div>
+    <p class="caption">You wanted to die... so there</p>
+  </section>
+
+  <!-- ========== ESCAPE ========== -->
+  <section class="scene" id="escape">
+    <div class="layer bg-layer" style="background-image: url('images/bg-ruins.jpg');"></div>
+    <div class="ink-wash"></div>
+
+    <div class="layer mid-layer">
+      <img src="images/10-dancing-in-ruins.jpg" alt="Leila dancing" class="float" data-speed="0.18">
+    </div>
+
+    <div class="text-layer">
+      <p class="final-line">It was all in her head.</p>
+      <p class="final-line">And now she was free.</p>
+    </div>
+  </section>
+
+  <script>
+    // Progress bar
+    const progress = document.getElementById('progress');
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (scrollTop / docHeight) * 100 + '%';
+    });
+
+    // Intersection Observer for progressive reveal
+    const observerOptions = { threshold: 0.25, rootMargin: '0px 0px -10% 0px' };
+    
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          
+          // Special effects for intense scenes
+          if (entry.target.closest('#confrontation')) {
+            const img = entry.target.closest('.scene').querySelector('.tilt');
+            if (img) {
+              img.classList.add('active');
+              setTimeout(() => img.classList.remove('active'), 800);
+            }
+          }
+          
+          // Light beam
+          const beam = entry.target.closest('.scene')?.querySelector('.light-beam');
+          if (beam) beam.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all revealable elements
+    document.querySelectorAll('.internal, .dialogue, .title, .subtitle, .final-line, .mid-layer img, .caption')
+      .forEach(el => revealObserver.observe(el));
+
+    // Simple parallax on background layers
+    const bgLayers = document.querySelectorAll('.bg-layer');
+    const midImages = document.querySelectorAll('.mid-layer img[data-speed]');
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+
+      bgLayers.forEach(layer => {
+        const speed = 0.25;
+        const yPos = -(scrollY * speed);
+        layer.style.transform = `scale(1.08) translateY(${yPos * 0.15}px)`;
+      });
+
+      midImages.forEach(img => {
+        const speed = parseFloat(img.dataset.speed) || 0.1;
+        const rect = img.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const viewCenter = window.innerHeight / 2;
+        const offset = (center - viewCenter) * speed;
+        img.style.transform = `translateY(${offset}px)`;
+      });
+    });
+  </script>
+</body>
+</html>
