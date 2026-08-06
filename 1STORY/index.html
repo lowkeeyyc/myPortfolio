@@ -8,9 +8,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
   :root {
-    --bg-dark: #0c0b0a;
+    --bg-dark: #030303;
     --bg-kitchen: #1a1714;
-    --bg-bedroom: #12100e;
+    --bg-bedroom: #070707;
     --text-main: #e8e0d5;
     --text-dim: #9a8f82;
     --accent: #c45c3a;
@@ -47,8 +47,41 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: radial-gradient(ellipse at center, #1f1a16 0%, #0c0b0a 70%);
     position: relative;
+    overflow: hidden;
+    background-color: #0e0d0c;
+
+    /* Black & white ladybug-spot field */
+    background-image:
+      radial-gradient(circle at 15% 20%, #1a1918 0%, transparent 8%),
+      radial-gradient(circle at 78% 12%, #1a1918 0%, transparent 10%),
+      radial-gradient(circle at 42% 35%, #1a1918 0%, transparent 7%),
+      radial-gradient(circle at 88% 48%, #1a1918 0%, transparent 9%),
+      radial-gradient(circle at 25% 68%, #1a1918 0%, transparent 11%),
+      radial-gradient(circle at 65% 72%, #1a1918 0%, transparent 8%),
+      radial-gradient(circle at 10% 85%, #1a1918 0%, transparent 7%),
+      radial-gradient(circle at 55% 18%, #1a1918 0%, transparent 6%),
+      radial-gradient(circle at 92% 82%, #1a1918 0%, transparent 9%),
+      radial-gradient(circle at 38% 88%, #1a1918 0%, transparent 8%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  .intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 12%),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.025) 0%, transparent 10%),
+      radial-gradient(circle at 45% 80%, rgba(255,255,255,0.02) 0%, transparent 9%);
+    animation: pulse-spots 12s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes pulse-spots {
+    0%   { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 1;   transform: scale(1.04); }
   }
   .intro h1 {
     font-size: clamp(2.8rem, 8vw, 5.5rem);
@@ -76,6 +109,179 @@
   @keyframes bounce {
     0%, 100% { transform: translateY(0); opacity: 0.5; }
     50% { transform: translateY(8px); opacity: 1; }
+  }
+  /* ========== KITCHEN SPECIAL EFFECTS ========== */
+  /* ----- Sink + fragment solidify reveal ----- */
+  .sink-scene {
+    position: relative;
+    margin-bottom: 10rem;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    min-height: 90vh;
+  }
+  @media (max-width: 900px) {
+    .sink-scene { grid-template-columns: 1fr; gap: 3rem; }
+  }
+
+  .water-reveal {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+    aspect-ratio: 4/5;          /* adjust if your image is different */
+  }
+
+  /* the real image sits behind, fully visible only when fragments land */
+  .sink-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.88) contrast(1.05);
+    opacity: 0;                 /* starts invisible */
+  }
+
+  /* fragment strips – each is a horizontal slice of the same image */
+  .fragment {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-image: url('images/sink.jpg');
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: translateY(-120px) scaleY(1.15);
+    filter: blur(3px);
+    will-change: transform, opacity, filter;
+  }
+
+  /* falling narration lines */
+  .falling-narration {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .falling-narration .line {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--text-dim);
+    font-style: italic;
+    opacity: 0;
+    transform: translateY(-40px);
+    filter: blur(4px);
+  }
+
+  /* ----- Talking to the walls ----- */
+  .walls-talk {
+    position: relative;
+    padding: 4rem 2.5rem;
+    margin: 6rem 0;
+    background: rgba(20, 17, 14, 0.7);
+    border: 1px solid rgba(140, 120, 100, 0.15);
+    overflow: hidden;
+  }
+  .wall-texture {
+    position: absolute;
+    inset: 0;
+    background: 
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 40px,
+        rgba(255,255,255,0.015) 40px,
+        rgba(255,255,255,0.015) 41px
+      );
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .echo-container {
+    position: relative;
+    z-index: 2;
+  }
+  .echo-line {
+    font-style: italic;
+    color: #cbb9a8;
+    margin: 1.1rem 0;
+    opacity: 0;
+    transform: translateX(-20px);
+    text-shadow: 0 0 20px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .echo-line::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 0.55em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.5;
+    transform: scale(0);
+  }
+
+  /* ----- Tray cascade ----- */
+  .tray-cascade {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 7rem 0 5rem;
+    position: relative;
+    height: 420px;
+  }
+  .tray-item {
+    width: 22%;
+    position: absolute;
+    opacity: 0;
+    transform: translateY(-80px) scale(0.92);
+    transition: none;
+  }
+  .tray-item img {
+    width: 100%;
+    border-radius: 3px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    display: block;
+  }
+  .tray-item[data-step="1"] { left: 0%;   top: 0; }
+  .tray-item[data-step="2"] { left: 26%;  top: 60px; }
+  .tray-item[data-step="3"] { left: 52%;  top: 120px; }
+  .tray-item[data-step="4"] { left: 78%;  top: 180px; }
+
+  @media (max-width: 700px) {
+    .tray-cascade { height: auto; flex-direction: column; align-items: center; }
+    .tray-item { position: relative; width: 80%; left: auto !important; top: auto !important; margin-bottom: 1.5rem; }
+  }
+
+  /* ----- Kettle rapture ----- */
+  .kettle-rapture {
+    position: relative;
+    margin: 8rem 0 4rem;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  .kettle-img {
+    max-width: 420px;
+    width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 0 0 rgba(196,92,58,0);
+    display: block;
+    margin: 0 auto 2.5rem;
+  }
+  .rapture-flash {
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(circle, rgba(245,230,200,0.35) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 50%;
+  }
+  .kettle-text {
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 1.15rem;
+    line-height: 1.8;
   }
 
   /* ========== SECTIONS ========== */
@@ -174,7 +380,7 @@
 
   /* ========== BEDROOM ========== */
   #bedroom {
-    background: #12100e;
+    background: #020700;
   }
   .scar-glow {
     position: absolute;
@@ -325,50 +531,117 @@
 <!-- ========== INTRO ========== -->
 <section class="intro" id="intro">
   <h1 id="title">Ladybug</h1>
-  <p id="subtitle">A short story by Eve </p>
+  <p id="subtitle">Written by Eve </p>
   <div class="scroll-hint">SCROLL</div>
 </section>
 
 <!-- ========== KITCHEN ========== -->
 <section id="kitchen">
+  <!-- ambient water sound (starts when section enters) -->
+  <audio id="water-sound" src="audio/running-water.mp3" preload="auto" loop></audio>
+  <audio id="kettle-sound" src="audio/kettle-hiss.mp3" preload="auto"></audio>
+
   <div class="section-inner">
-    <img src="images/kitchen-sink.jpg" alt="Kitchen sink" class="img-full" id="img-kitchen1">
-    
-    <div class="story-block">
-      <p class="narration">Leila, a skinny twenty year old black girl is washing a cup on the sink, the hissing sound of a kettle at the background. She turns and places the cup on a tray. Then places a small plate on the same tray, opens a cabinet, takes out a packet of two scones and closes the empty cabinet. She drops the scones on the plate. While she does this, she's talking to the walls...</p>
+
+    <!-- ========== 1. SINK + FIRST NARRATION (together) ========== -->
+    <div class="sink-scene" id="sink-scene">
+      <div class="water-reveal" id="water-reveal">
+        <!-- the final solid image (fades in after fragments land) -->
+        <img src="images/sink.jpg" alt="Leila washing a cup" class="sink-img" id="img-sink">
+
+        <!-- 12 horizontal fragments that fall into place from bottom to top -->
+        <div class="fragment" style="top: 0%;    height: 8.333%; background-position: 0 0%;"></div>
+        <div class="fragment" style="top: 8.333%; height: 8.333%; background-position: 0 8.333%;"></div>
+        <div class="fragment" style="top: 16.666%;height: 8.333%; background-position: 0 16.666%;"></div>
+        <div class="fragment" style="top: 25%;   height: 8.333%; background-position: 0 25%;"></div>
+        <div class="fragment" style="top: 33.333%;height: 8.333%; background-position: 0 33.333%;"></div>
+        <div class="fragment" style="top: 41.666%;height: 8.333%; background-position: 0 41.666%;"></div>
+        <div class="fragment" style="top: 50%;   height: 8.333%; background-position: 0 50%;"></div>
+        <div class="fragment" style="top: 58.333%;height: 8.333%; background-position: 0 58.333%;"></div>
+        <div class="fragment" style="top: 66.666%;height: 8.333%; background-position: 0 66.666%;"></div>
+        <div class="fragment" style="top: 75%;   height: 8.333%; background-position: 0 75%;"></div>
+        <div class="fragment" style="top: 83.333%;height: 8.333%; background-position: 0 83.333%;"></div>
+        <div class="fragment" style="top: 91.666%;height: 8.333%; background-position: 0 91.666%;"></div>
+      </div>
+
+      <div class="falling-narration" id="falling-narration">
+        <p class="line">Leila, a skinny twenty year old black girl is washing a cup on the sink,</p>
+        <p class="line">the hissing sound of a kettle at the background.</p>
+        <p class="line">While she does this, she's talking to the walls...</p>
+      </div>
     </div>
 
-    <div class="story-block self-talk">
-      <span class="character leila-name">Leila</span>
-      Me? Do it? No I...I possibly could not. Even though I want to... I can't, I'm not strong enough...<br><br>
-      Wow, this is embarassing...<br><br>
-      Oh dear, these won't be enough will they?<br><br>
-      Well, you know how the economy is....but... if you ask me I think this is good...you know...us girls, we aren't supposed to be eating a lot. We have to maintain a slim figure you know?
+    <!-- ========== 2. SELF-TALK (talking to the walls) ========== -->
+    <div class="walls-talk story-block" id="walls-talk">
+      <div class="wall-texture"></div>
+      <div class="echo-container">
+        <span class="character leila-name">Leila</span>
+        <p class="echo-line" data-delay="0">Me? Do it? No I...I possibly could not.</p>
+        <p class="echo-line" data-delay="0.4">Even though I want to... I can't, I'm not strong enough...</p>
+        
+      </div>
     </div>
 
-    <div class="story-block">
-      <p class="narration">She pours a tablespoon of coffee powder and two tablespoons of sugar on the cup.</p>
+    <div>
+      <p class="line">She turns and places the cup on a tray.</p>
+      <p class="line">Then places a small plate on the same tray,</p>
+      <p class="line">opens a cabinet, takes out a packet of two scones and closes the empty cabinet.</p>
     </div>
 
+    <div class="walls-talk story-block" id="walls-talk">
+      <div class="wall-texture"></div>
+      <div class="echo-container">
+        <span class="character leila-name">Leila</span>
+        <p class="echo-line" data-delay="1.3">Oh dear, these won't be enough will they?</p>
+        <p class="echo-line" data-delay="1.8">Well, you know how the economy is....but... if you ask me I think this is good...</p>
+        <p class="echo-line" data-delay="2.3">you know...us girls, we aren't supposed to be eating a lot.</p>
+        <p class="echo-line" data-delay="2.7">We have to maintain a slim figure you know?</p>
+      </div>
+    </div>
+
+    <div>
+      <p class="line">She drops the scones on the plate.</p>
+    </div>
+    <!-- ========== 3. TRAY CASCADE (4 images) ========== -->
+    <div class="tray-cascade" id="tray-cascade">
+      <div class="tray-item" data-step="1">
+        <img src="images/tray-1.jpg" alt="Empty tray">
+      </div>
+      <div class="tray-item" data-step="2">
+        <img src="images/tray-2.jpg" alt="Tray with plate">
+      </div>
+      <div class="tray-item" data-step="3">
+        <img src="images/tray-3.jpg" alt="Tray with scones">
+      </div>
+    </div>
+
+    <!-- ========== 4. SECOND SELF-TALK ========== -->
     <div class="story-block self-talk">
       <span class="character leila-name">Leila (cont'd)</span>
       Oh I love coffee, it's a diuretic. It has caffeine so you don't really get hungry...actually coffee doesn't dehydrate the body, even though caffeine makes you pee more, there's a higher water content in your cup of coffee than the amount your body loses...<br><br>
       Cigarettes? No I can't smoke cigarrettes the witch won't let me.
     </div>
 
-    <div class="story-block">
-      <p class="narration">By now the kettle is hissing to it's fullest, then suddenly it clicks off. Which brings Leila back to the present. She then takes the kettle and pours the boiling water on the cup that was on the tray. Then carrying the tray, she walks out of the kitchen.</p>
+    <!-- ========== 5. KETTLE RAPTURE ========== -->
+    <div class="kettle-rapture" id="kettle-rapture">
+      <img src="images/kettle.jpg" alt="Kettle boiling" class="kettle-img" id="img-kettle">
+      <div class="rapture-flash"></div>
+      <p class="narration kettle-text">
+        By now the kettle is hissing to it's fullest, then suddenly it clicks off.<br>
+        Which brings Leila back to the present.<br>
+        She then takes the kettle and pours the boiling water on the cup that was on the tray.<br>
+        Then carrying the tray, she walks out of the kitchen.
+      </p>
     </div>
 
-    <img src="images/tray.jpg" alt="Tray with coffee and scones" class="img-full" id="img-tray">
   </div>
 </section>
+
+<section></section>
 
 <!-- ========== BEDROOM 1 ========== -->
 <section id="bedroom">
   <div class="section-inner">
-    <img src="images/bedroom-delilah.jpg" alt="Delilah in bed" class="img-full" id="img-delilah1">
-
     <div class="story-block">
       <p class="narration">Leila appears holding a tray.</p>
     </div>
@@ -382,6 +655,8 @@
       <p class="narration">An old sick woman is lying on the bed. Delilah has eczema and a couple of radiation scars on her skin. Her thiny brown hair barely covers her head.<br><br>
       Leila places the tray on the bed.</p>
     </div>
+    
+    <img src="images/tray-bed.png" alt="tray in bed" class="img-full" id="img-tray">
 
     <div class="story-block">
       <span class="character leila-name">Leila</span>
@@ -1720,6 +1995,191 @@
         toggleActions: 'play none none none'
       }
     });
+  });
+
+  // ========== KITCHEN EFFECTS ==========
+  const waterAudio = document.getElementById('water-sound');
+
+  // Water sound + sink reveal
+  ScrollTrigger.create({
+    trigger: '#sink-scene',
+    start: 'top 85%',
+    end: 'bottom 20%',
+    onEnter: () => {
+      waterAudio.currentTime = 0;
+      waterAudio.volume = 0.35;
+      waterAudio.play().catch(()=>{});
+    },
+    onLeave: () => {
+      gsap.to(waterAudio, { volume: 0, duration: 1.2, onComplete: () => waterAudio.pause() });
+    },
+    onEnterBack: () => {
+      waterAudio.volume = 0.35;
+      waterAudio.play().catch(()=>{});
+    },
+    onLeaveBack: () => {
+      gsap.to(waterAudio, { volume: 0, duration: 0.8, onComplete: () => waterAudio.pause() });
+    }
+  });
+
+  // ========== SLOW FRAGMENT SOLIDIFY (bottom → top) ==========
+  const fragments = gsap.utils.toArray('.fragment');
+
+  // reverse order so bottom fragments land first
+  const ordered = [...fragments].reverse();
+
+  ordered.forEach((frag, i) => {
+    gsap.to(frag, {
+      opacity: 1,
+      y: 0,
+      scaleY: 1,
+      filter: 'blur(0px)',
+      duration: 2.8,                    // each piece takes almost 2 seconds
+      delay: i * 0.5,                  // big gap between pieces → very slow cascade
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '#sink-scene',
+        start: 'top 82%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+  });
+
+  // after all fragments have landed, gently solidify the real image
+  gsap.to('#img-sink', {
+    opacity: 1,
+    duration: 2.2,
+    delay: ordered.length * 0.38 + 0.6, // waits for the last fragment
+    ease: 'power1.inOut',
+    scrollTrigger: {
+      trigger: '#sink-scene',
+      start: 'top 82%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // ========== MUCH SLOWER FALLING NARRATION ==========
+  gsap.utils.toArray('.falling-narration .line').forEach((line, i) => {
+    gsap.to(line, {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      duration: 2.8,                    // each line takes 2.8 s
+      delay: 1.8 + i * 0.85,            // long pause between lines
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '#sink-scene',
+        start: 'top 78%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+  });
+
+  // Walls self-talk – staggered echo appearance
+  gsap.utils.toArray('.echo-line').forEach((line) => {
+    const delay = parseFloat(line.dataset.delay) || 0;
+    gsap.to(line, {
+      opacity: 1,
+      x: 0,
+      duration: 2.0,
+      delay: delay,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '#walls-talk',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+    gsap.to(line.querySelector('::before') || line, {
+      scale: 1,
+      duration: 0.6,
+      delay: delay + 0.15,
+      scrollTrigger: {
+        trigger: '#walls-talk',
+        start: 'top 80%'
+      }
+    });
+  });
+
+  // Tray cascade – falling stairs
+  gsap.utils.toArray('.tray-item').forEach((item, i) => {
+    gsap.to(item, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 3,
+      delay: 2.8 + i * 1.85,
+      ease: 'back.out(1.4)',
+      scrollTrigger: {
+        trigger: '#tray-cascade',
+        start: 'top 78%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+  });
+
+  // Kettle rapture – sudden appearance + sound
+  ScrollTrigger.create({
+    trigger: '#kettle-rapture',
+    start: 'top 75%',
+    once: true,
+    onEnter: () => {
+      // visual
+      gsap.to('#kettle-rapture', {
+        opacity: 1,
+        scale: 1,
+        duration: 0.7,
+        ease: 'back.out(2)'
+      });
+      gsap.fromTo('.rapture-flash', 
+        { opacity: 0, scale: 0.3 },
+        { opacity: 5, scale: 1.6, duration: 0.5, ease: 'power2.out',
+          onComplete: () => gsap.to('.rapture-flash', { opacity: 0, duration: 1.2 })
+        }
+      );
+      gsap.to('.kettle-img', {
+        boxShadow: '0 0 80px rgba(196,92,58,0.45)',
+        duration: 0.8
+      });
+    }
+  });
+  // ========== KETTLE AUDIO – starts earlier, ends after image leaves ==========
+  const kettleAudio = document.getElementById('kettle-sound');
+
+  // Start the hiss when the previous division (tray cascade) comes into view
+  ScrollTrigger.create({
+    trigger: '#tray-cascade',          // ← previous division
+    start: 'top 80%',
+    onEnter: () => {
+      kettleAudio.currentTime = 0;
+      kettleAudio.volume = 0;
+      kettleAudio.play().catch(()=>{});
+      // gentle fade-in
+      gsap.to(kettleAudio, { volume: 0.55, duration: 1.5, ease: 'power1.out' });
+    },
+    onEnterBack: () => {
+      kettleAudio.volume = 0.55;
+      kettleAudio.play().catch(()=>{});
+    }
+  });
+
+  // Stop / fade out only after the kettle image has left the viewport
+  ScrollTrigger.create({
+    trigger: '#kettle-rapture',
+    start: 'bottom 10%',               // when the bottom of the kettle section is near the top of the screen
+    onLeave: () => {
+      gsap.to(kettleAudio, {
+        volume: 0,
+        duration: 1.1,
+        ease: 'power1.in',
+        onComplete: () => kettleAudio.pause()
+      });
+    },
+    onEnterBack: () => {
+      // if user scrolls back up, restore sound
+      kettleAudio.volume = 0.55;
+      kettleAudio.play().catch(()=>{});
+    }
   });
 
   // Light beam & detail reveal
