@@ -1,0 +1,831 @@
+:root {
+    --bg-dark: #030303;
+    --bg-kitchen: #1a1714;
+    --bg-bedroom: #070707;
+    --text-main: #e8e0d5;
+    --text-dim: #9a8f82;
+    --accent: #c45c3a;
+    --light-beam: #f5e6c8;
+    --ladybug: #d62828;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    overflow-x: hidden;
+    line-height: 1.65;
+}
+
+/* ========== PROGRESS BAR ========== */
+#progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--light-beam));
+    width: 0%;
+    z-index: 9999;
+    transition: width 0.1s linear;
+}
+
+/* ========== INTRO ========== */
+.intro {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background-color: #0e0d0c;
+
+    /* Black & white ladybug-spot field */
+    background-image:
+        radial-gradient(circle at 15% 20%, #1a1918 0%, transparent 8%),
+        radial-gradient(circle at 78% 12%, #1a1918 0%, transparent 10%),
+        radial-gradient(circle at 42% 35%, #1a1918 0%, transparent 7%),
+        radial-gradient(circle at 88% 48%, #1a1918 0%, transparent 9%),
+        radial-gradient(circle at 25% 68%, #1a1918 0%, transparent 11%),
+        radial-gradient(circle at 65% 72%, #1a1918 0%, transparent 8%),
+        radial-gradient(circle at 10% 85%, #1a1918 0%, transparent 7%),
+        radial-gradient(circle at 55% 18%, #1a1918 0%, transparent 6%),
+        radial-gradient(circle at 92% 82%, #1a1918 0%, transparent 9%),
+        radial-gradient(circle at 38% 88%, #1a1918 0%, transparent 8%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.03) 0%, transparent 12%),
+        radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.025) 0%, transparent 10%),
+        radial-gradient(circle at 45% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 9%);
+    animation: pulse-spots 12s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes pulse-spots {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+.intro h1 {
+    font-size: clamp(2.8rem, 8vw, 5.5rem);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+.intro p {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0;
+}
+
+.scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.25em;
+    animation: bounce 2.2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateY(8px);
+        opacity: 1;
+    }
+}
+
+/* ========== KITCHEN SPECIAL EFFECTS ========== */
+/* ----- Sink + fragment solidify reveal ----- */
+.sink-scene {
+    position: relative;
+    margin-bottom: 10rem;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    min-height: 90vh;
+}
+
+@media (max-width: 900px) {
+    .sink-scene {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
+.water-reveal {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+    aspect-ratio: 4/5;
+    /* adjust if your image is different */
+}
+
+/* the real image sits behind, fully visible only when fragments land */
+.sink-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.88) contrast(1.05);
+    opacity: 0;
+    /* starts invisible */
+}
+
+/* fragment strips – each is a horizontal slice of the same image */
+.fragment {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-image: url('images/sink.jpg');
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: translateY(-120px) scaleY(1.15);
+    filter: blur(3px);
+    will-change: transform, opacity, filter;
+}
+
+/* falling narration lines */
+.falling-narration {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.falling-narration .line {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--text-dim);
+    font-style: italic;
+    opacity: 0;
+    transform: translateY(-40px);
+    filter: blur(4px);
+}
+
+/* ----- Talking to the walls ----- */
+.walls-talk {
+    position: relative;
+    padding: 4rem 2.5rem;
+    margin: 6rem 0;
+    background: rgba(20, 17, 14, 0.7);
+    border: 1px solid rgba(140, 120, 100, 0.15);
+    overflow: hidden;
+}
+
+.wall-texture {
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(90deg,
+            transparent,
+            transparent 40px,
+            rgba(255, 255, 255, 0.015) 40px,
+            rgba(255, 255, 255, 0.015) 41px);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.echo-container {
+    position: relative;
+    z-index: 2;
+}
+
+.echo-line {
+    font-style: italic;
+    color: #cbb9a8;
+    margin: 1.1rem 0;
+    opacity: 0;
+    transform: translateX(-20px);
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.echo-line::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 0.55em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.5;
+    transform: scale(0);
+}
+
+/* ----- Tray cascade ----- */
+.tray-cascade {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 7rem 0 5rem;
+    position: relative;
+    height: 420px;
+}
+
+.tray-item {
+    width: 22%;
+    position: absolute;
+    opacity: 0;
+    transform: translateY(-80px) scale(0.92);
+    transition: none;
+}
+
+.tray-item img {
+    width: 100%;
+    border-radius: 3px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    display: block;
+}
+
+.tray-item[data-step="1"] {
+    left: 0%;
+    top: 0;
+}
+
+.tray-item[data-step="2"] {
+    left: 26%;
+    top: 60px;
+}
+
+.tray-item[data-step="3"] {
+    left: 52%;
+    top: 120px;
+}
+
+.tray-item[data-step="4"] {
+    left: 78%;
+    top: 180px;
+}
+
+@media (max-width: 700px) {
+    .tray-cascade {
+        height: auto;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tray-item {
+        position: relative;
+        width: 80%;
+        left: auto !important;
+        top: auto !important;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* ----- Kettle rapture ----- */
+.kettle-rapture {
+    position: relative;
+    margin: 8rem 0 4rem;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.7);
+}
+
+.kettle-img {
+    max-width: 420px;
+    width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 0 0 rgba(196, 92, 58, 0);
+    display: block;
+    margin: 0 auto 2.5rem;
+}
+
+.rapture-flash {
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(circle, rgba(245, 230, 200, 0.35) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 50%;
+}
+
+.kettle-text {
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 1.15rem;
+    line-height: 1.8;
+}
+
+/* ========== SECTIONS ========== */
+section {
+    position: relative;
+    padding: 12vh 6vw;
+    min-height: 100vh;
+}
+
+.section-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* sticky visual panels */
+.sticky-visual {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticky-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.55) contrast(1.1) saturate(0.7);
+    transition: filter 1.2s ease;
+}
+
+/* text blocks */
+.story-block {
+    margin: 4rem 0;
+    opacity: 0;
+    transform: translateY(60px);
+}
+
+.story-block.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+p,
+.dialogue {
+    margin-bottom: 1.4rem;
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+}
+
+.narration {
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+.dialogue {
+    color: var(--text-main);
+}
+
+.character {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.leila-name {
+    color: #d4a574;
+}
+
+.delilah-name {
+    color: #a67c6d;
+}
+
+/* self-talk special */
+.self-talk {
+    font-style: italic;
+    color: #b8a99a;
+    border-left: 2px solid #5c4e42;
+    padding-left: 1.4rem;
+    margin: 2rem 0;
+}
+
+/* ========== KITCHEN ========== */
+#kitchen {
+    background: linear-gradient(180deg, #0c0b0a 0%, #1a1714 40%, #1a1714 100%);
+}
+
+.steam {
+    position: absolute;
+    width: 4px;
+    height: 60px;
+    background: linear-gradient(to top, transparent, rgba(255, 255, 255, 0.25));
+    border-radius: 50%;
+    animation: rise 3s ease-in infinite;
+    opacity: 0;
+}
+
+@keyframes rise {
+    0% {
+        transform: translateY(40px) scaleY(0.4);
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translateY(-120px) scaleY(1.2);
+        opacity: 0;
+    }
+}
+/* ========== BEDROOM ========== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+
+#bedroom {
+  background: transparent;
+  padding: 12vh 0 20vh;
+  color: #e8e0d5;
+}
+
+.type-stage {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.type-block {
+  margin: 3.8rem 0;
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+/* Names */
+.name {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  opacity: 0.7;
+}
+.delilah .name,
+.delilah-name { color: #c47a6a; }
+.leila .name,
+.leila-name   { color: #d4a574; }
+
+/* Base lines */
+.line {
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Delilah – sharp, condensed, slightly aggressive */
+.delilah .line.sharp {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  letter-spacing: 0.04em;
+  color: #f2e8dc;
+  font-weight: 400;
+}
+
+/* Leila – softer, more delicate */
+.leila .line.soft {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+  font-style: italic;
+  color: #d8cfc4;
+  letter-spacing: 0.01em;
+}
+
+/* Explosive YES! */
+.line.explode {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4.5rem, 14vw, 8rem);
+  letter-spacing: 0.06em;
+  color: #fff;
+  text-shadow: 0 0 40px rgba(224, 122, 95, 0.5);
+  line-height: 0.9;
+  margin: 1rem 0;
+}
+
+/* Small rapid lines */
+.line.small {
+  font-size: clamp(1.2rem, 2.8vw, 1.5rem) !important;
+}
+
+/* Whisper */
+.line.whisper-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: #7a6e62;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+/* Long bitter monologue */
+.line.bitter {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.25rem, 2.8vw, 1.55rem);
+  line-height: 1.55;
+  color: #e0d5c8;
+  font-weight: 400;
+}
+
+/* Heavy emotional beat */
+.line.heavy-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  line-height: 1.5;
+  color: #f0e6dc;
+}
+.heavy-text .sting {
+  color: #e07a5f;
+  font-style: italic;
+  font-weight: 700;
+}
+.heavy-text .pause {
+  color: #6a5a4a;
+  font-size: 0.9em;
+  letter-spacing: 0.1em;
+}
+
+/* The orphanage crush */
+.line.crush-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+  line-height: 1.35;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Soft apology */
+.line.soft-apology {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  color: #b8a99a;
+  line-height: 1.5;
+}
+
+/* Narration */
+.narration p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: #7a6e62;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.narration .small {
+  font-size: 1rem;
+  margin-top: 1rem;
+  opacity: 0.8;
+}
+.narration .action {
+  color: #9a8a7a;
+}
+.hurt-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  color: #a08070;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* Image */
+.type-img {
+  display: block;
+  max-width: 380px;
+  width: 85%;
+  margin: 0 auto;
+  filter: brightness(0.8) contrast(1.1);
+  opacity: 0.9;
+}
+
+/* Layout helpers */
+.cascade .line {
+  margin-bottom: 0.6rem;
+}
+.exchange {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+.exchange .pair.reply {
+  text-align: right;
+}
+.exchange .pair.reply .name {
+  text-align: right;
+}
+
+/* Tiny */
+.line.tiny {
+  font-size: 1.2rem !important;
+  opacity: 0.85;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .line.explode { font-size: 3.8rem; }
+  .line.crush-text { font-size: 1.5rem; }
+}
+
+/* ========== AWAKENING ========== */
+#awakening {
+    background: #0e0d0b;
+    overflow: hidden;
+}
+
+.light-beam {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 60vw;
+    height: 140vh;
+    background: linear-gradient(115deg, transparent 30%, rgba(245, 230, 200, 0.08) 50%, transparent 70%);
+    transform: rotate(18deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.light-beam.active {
+    opacity: 1;
+    transition: opacity 2.5s ease;
+}
+
+.ladybug {
+    width: 42px;
+    height: 42px;
+    position: absolute;
+    opacity: 0;
+    filter: drop-shadow(0 0 8px rgba(214, 40, 40, 0.6));
+}
+
+.detail-reveal {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: all 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.detail-reveal.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ========== CONFRONTATION ========== */
+#confrontation {
+    background: #0a0908;
+}
+
+.scream-echo {
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(196, 92, 58, 0.5);
+    opacity: 0;
+    transform: scale(0.7);
+}
+
+/* ========== ESCAPE ========== */
+#escape {
+    background: linear-gradient(180deg, #0a0908 0%, #1c1814 60%, #2a231c 100%);
+    min-height: 140vh;
+}
+
+.freedom-text {
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    text-align: center;
+    letter-spacing: 0.1em;
+    opacity: 0;
+}
+
+.dance {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    opacity: 0;
+}
+
+.dance span {
+    display: inline-block;
+    font-size: 2.5rem;
+    animation: dance 1.4s ease-in-out infinite;
+}
+
+.dance span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dance span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dance {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-6deg);
+    }
+
+    50% {
+        transform: translateY(-18px) rotate(6deg);
+    }
+}
+
+/* ========== IMAGE PLACEHOLDERS ========== */
+.img-full {
+    width: 100%;
+    max-width: 900px;
+    margin: 3rem auto;
+    display: block;
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+.img-full.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 1.4s ease;
+}
+
+.img-side {
+    float: right;
+    width: 42%;
+    margin: 0 0 2rem 2.5rem;
+    border-radius: 3px;
+    opacity: 0;
+}
+
+/* ========== FINAL ========== */
+.final {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: radial-gradient(ellipse at bottom, #2a231c 0%, #0c0b0a 70%);
+}
+
+.final h2 {
+    font-size: clamp(2rem, 6vw, 3.8rem);
+    margin-bottom: 1rem;
+    opacity: 0;
+}
+
+.final p {
+    color: var(--text-dim);
+    max-width: 480px;
+    opacity: 0;
+}
+
+/* mobile */
+@media (max-width: 700px) {
+    section {
+        padding: 8vh 5vw;
+    }
+
+    .img-side {
+        float: none;
+        width: 100%;
+        margin: 0 0 2rem 0;
+    }
+}

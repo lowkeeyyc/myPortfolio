@@ -1,2255 +1,1615 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ladybug — A Scrolly Story</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<style>
-  :root {
-    --bg-dark: #030303;
-    --bg-kitchen: #1a1714;
-    --bg-bedroom: #070707;
-    --text-main: #e8e0d5;
-    --text-dim: #9a8f82;
-    --accent: #c45c3a;
-    --light-beam: #f5e6c8;
-    --ladybug: #d62828;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ladybug — A Scrolly Story</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    background: var(--bg-dark);
-    color: var(--text-main);
-    overflow-x: hidden;
-    line-height: 1.65;
-  }
-
-  /* ========== PROGRESS BAR ========== */
-  #progress {
-    position: fixed;
-    top: 0; left: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--light-beam));
-    width: 0%;
-    z-index: 9999;
-    transition: width 0.1s linear;
-  }
-
-  /* ========== INTRO ========== */
-  .intro {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    background-color: #0e0d0c;
-
-    /* Black & white ladybug-spot field */
-    background-image:
-      radial-gradient(circle at 15% 20%, #1a1918 0%, transparent 8%),
-      radial-gradient(circle at 78% 12%, #1a1918 0%, transparent 10%),
-      radial-gradient(circle at 42% 35%, #1a1918 0%, transparent 7%),
-      radial-gradient(circle at 88% 48%, #1a1918 0%, transparent 9%),
-      radial-gradient(circle at 25% 68%, #1a1918 0%, transparent 11%),
-      radial-gradient(circle at 65% 72%, #1a1918 0%, transparent 8%),
-      radial-gradient(circle at 10% 85%, #1a1918 0%, transparent 7%),
-      radial-gradient(circle at 55% 18%, #1a1918 0%, transparent 6%),
-      radial-gradient(circle at 92% 82%, #1a1918 0%, transparent 9%),
-      radial-gradient(circle at 38% 88%, #1a1918 0%, transparent 8%);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-  }
-
-  .intro::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 12%),
-      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.025) 0%, transparent 10%),
-      radial-gradient(circle at 45% 80%, rgba(255,255,255,0.02) 0%, transparent 9%);
-    animation: pulse-spots 12s ease-in-out infinite alternate;
-    pointer-events: none;
-  }
-
-  @keyframes pulse-spots {
-    0%   { opacity: 0.6; transform: scale(1); }
-    100% { opacity: 1;   transform: scale(1.04); }
-  }
-  .intro h1 {
-    font-size: clamp(2.8rem, 8vw, 5.5rem);
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  .intro p {
-    margin-top: 1.5rem;
-    font-size: 1.1rem;
-    color: var(--text-dim);
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    opacity: 0;
-  }
-  .scroll-hint {
-    position: absolute;
-    bottom: 40px;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    letter-spacing: 0.25em;
-    animation: bounce 2.2s infinite;
-  }
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); opacity: 0.5; }
-    50% { transform: translateY(8px); opacity: 1; }
-  }
-  /* ========== KITCHEN SPECIAL EFFECTS ========== */
-  /* ----- Sink + fragment solidify reveal ----- */
-  .sink-scene {
-    position: relative;
-    margin-bottom: 10rem;
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-    min-height: 90vh;
-  }
-  @media (max-width: 900px) {
-    .sink-scene { grid-template-columns: 1fr; gap: 3rem; }
-  }
-
-  .water-reveal {
-    position: relative;
-    overflow: hidden;
-    border-radius: 4px;
-    box-shadow: 0 30px 70px rgba(0,0,0,0.55);
-    aspect-ratio: 4/5;          /* adjust if your image is different */
-  }
-
-  /* the real image sits behind, fully visible only when fragments land */
-  .sink-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    filter: brightness(0.88) contrast(1.05);
-    opacity: 0;                 /* starts invisible */
-  }
-
-  /* fragment strips – each is a horizontal slice of the same image */
-  .fragment {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background-image: url('images/sink.jpg');
-    background-size: 100% auto;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transform: translateY(-120px) scaleY(1.15);
-    filter: blur(3px);
-    will-change: transform, opacity, filter;
-  }
-
-  /* falling narration lines */
-  .falling-narration {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-  }
-  .falling-narration .line {
-    font-size: clamp(1rem, 2vw, 1.2rem);
-    color: var(--text-dim);
-    font-style: italic;
-    opacity: 0;
-    transform: translateY(-40px);
-    filter: blur(4px);
-  }
-
-  /* ----- Talking to the walls ----- */
-  .walls-talk {
-    position: relative;
-    padding: 4rem 2.5rem;
-    margin: 6rem 0;
-    background: rgba(20, 17, 14, 0.7);
-    border: 1px solid rgba(140, 120, 100, 0.15);
-    overflow: hidden;
-  }
-  .wall-texture {
-    position: absolute;
-    inset: 0;
-    background: 
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 40px,
-        rgba(255,255,255,0.015) 40px,
-        rgba(255,255,255,0.015) 41px
-      );
-    opacity: 0.6;
-    pointer-events: none;
-  }
-  .echo-container {
-    position: relative;
-    z-index: 2;
-  }
-  .echo-line {
-    font-style: italic;
-    color: #cbb9a8;
-    margin: 1.1rem 0;
-    opacity: 0;
-    transform: translateX(-20px);
-    text-shadow: 0 0 20px rgba(0,0,0,0.4);
-    position: relative;
-  }
-  .echo-line::before {
-    content: '';
-    position: absolute;
-    left: -18px;
-    top: 0.55em;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0.5;
-    transform: scale(0);
-  }
-
-  /* ----- Tray cascade ----- */
-  .tray-cascade {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin: 7rem 0 5rem;
-    position: relative;
-    height: 420px;
-  }
-  .tray-item {
-    width: 22%;
-    position: absolute;
-    opacity: 0;
-    transform: translateY(-80px) scale(0.92);
-    transition: none;
-  }
-  .tray-item img {
-    width: 100%;
-    border-radius: 3px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-    display: block;
-  }
-  .tray-item[data-step="1"] { left: 0%;   top: 0; }
-  .tray-item[data-step="2"] { left: 26%;  top: 60px; }
-  .tray-item[data-step="3"] { left: 52%;  top: 120px; }
-  .tray-item[data-step="4"] { left: 78%;  top: 180px; }
-
-  @media (max-width: 700px) {
-    .tray-cascade { height: auto; flex-direction: column; align-items: center; }
-    .tray-item { position: relative; width: 80%; left: auto !important; top: auto !important; margin-bottom: 1.5rem; }
-  }
-
-  /* ----- Kettle rapture ----- */
-  .kettle-rapture {
-    position: relative;
-    margin: 8rem 0 4rem;
-    text-align: center;
-    opacity: 0;
-    transform: scale(0.7);
-  }
-  .kettle-img {
-    max-width: 420px;
-    width: 100%;
-    border-radius: 4px;
-    box-shadow: 0 0 0 rgba(196,92,58,0);
-    display: block;
-    margin: 0 auto 2.5rem;
-  }
-  .rapture-flash {
-    position: absolute;
-    inset: -40px;
-    background: radial-gradient(circle, rgba(245,230,200,0.35) 0%, transparent 70%);
-    opacity: 0;
-    pointer-events: none;
-    border-radius: 50%;
-  }
-  .kettle-text {
-    max-width: 560px;
-    margin: 0 auto;
-    font-size: 1.15rem;
-    line-height: 1.8;
-  }
-
-  /* ========== SECTIONS ========== */
-  section {
-    position: relative;
-    padding: 12vh 6vw;
-    min-height: 100vh;
-  }
-  .section-inner {
-    max-width: 780px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
-  }
-
-  /* sticky visual panels */
-  .sticky-visual {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    width: 100%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .sticky-visual img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: brightness(0.55) contrast(1.1) saturate(0.7);
-    transition: filter 1.2s ease;
-  }
-
-  /* text blocks */
-  .story-block {
-    margin: 4rem 0;
-    opacity: 0;
-    transform: translateY(60px);
-  }
-  .story-block.visible {
-    opacity: 1;
-    transform: translateY(0);
-    transition: all 1.1s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  p, .dialogue {
-    margin-bottom: 1.4rem;
-    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
-  }
-  .narration {
-    color: var(--text-dim);
-    font-style: italic;
-  }
-  .dialogue {
-    color: var(--text-main);
-  }
-  .character {
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-    display: block;
-    margin-bottom: 0.3rem;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-  }
-  .leila-name { color: #d4a574; }
-  .delilah-name { color: #a67c6d; }
-
-  /* self-talk special */
-  .self-talk {
-    font-style: italic;
-    color: #b8a99a;
-    border-left: 2px solid #5c4e42;
-    padding-left: 1.4rem;
-    margin: 2rem 0;
-  }
-
-  /* ========== KITCHEN ========== */
-  #kitchen {
-    background: linear-gradient(180deg, #0c0b0a 0%, #1a1714 40%, #1a1714 100%);
-  }
-  .steam {
-    position: absolute;
-    width: 4px; height: 60px;
-    background: linear-gradient(to top, transparent, rgba(255,255,255,0.25));
-    border-radius: 50%;
-    animation: rise 3s ease-in infinite;
-    opacity: 0;
-  }
-  @keyframes rise {
-    0% { transform: translateY(40px) scaleY(0.4); opacity: 0; }
-    30% { opacity: 0.5; }
-    100% { transform: translateY(-120px) scaleY(1.2); opacity: 0; }
-  }
-
-  /* ========== BEDROOM ========== */
-  #bedroom {
-    background: #020700;
-  }
-  .scar-glow {
-    position: absolute;
-    width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(196,92,58,0.15) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  /* ========== AWAKENING ========== */
-  #awakening {
-    background: #0e0d0b;
-    overflow: hidden;
-  }
-  .light-beam {
-    position: absolute;
-    top: -20%;
-    right: -10%;
-    width: 60vw;
-    height: 140vh;
-    background: linear-gradient(115deg, transparent 30%, rgba(245,230,200,0.08) 50%, transparent 70%);
-    transform: rotate(18deg);
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .light-beam.active {
-    opacity: 1;
-    transition: opacity 2.5s ease;
-  }
-  .ladybug {
-    width: 42px;
-    height: 42px;
-    position: absolute;
-    opacity: 0;
-    filter: drop-shadow(0 0 8px rgba(214,40,40,0.6));
-  }
-  .detail-reveal {
-    opacity: 0;
-    transform: scale(0.92);
-    transition: all 1.8s cubic-bezier(0.22,1,0.36,1);
-  }
-  .detail-reveal.visible {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  /* ========== CONFRONTATION ========== */
-  #confrontation {
-    background: #0a0908;
-  }
-  .scream-echo {
-    font-size: clamp(1.6rem, 4vw, 2.8rem);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #fff;
-    text-shadow: 0 0 40px rgba(196,92,58,0.5);
-    opacity: 0;
-    transform: scale(0.7);
-  }
-
-  /* ========== ESCAPE ========== */
-  #escape {
-    background: linear-gradient(180deg, #0a0908 0%, #1c1814 60%, #2a231c 100%);
-    min-height: 140vh;
-  }
-  .freedom-text {
-    font-size: clamp(1.8rem, 5vw, 3.2rem);
-    text-align: center;
-    letter-spacing: 0.1em;
-    opacity: 0;
-  }
-  .dance {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-top: 3rem;
-    opacity: 0;
-  }
-  .dance span {
-    display: inline-block;
-    font-size: 2.5rem;
-    animation: dance 1.4s ease-in-out infinite;
-  }
-  .dance span:nth-child(2) { animation-delay: 0.2s; }
-  .dance span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes dance {
-    0%, 100% { transform: translateY(0) rotate(-6deg); }
-    50% { transform: translateY(-18px) rotate(6deg); }
-  }
-
-  /* ========== IMAGE PLACEHOLDERS ========== */
-  .img-full {
-    width: 100%;
-    max-width: 900px;
-    margin: 3rem auto;
-    display: block;
-    border-radius: 4px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  .img-full.visible {
-    opacity: 1;
-    transform: translateY(0);
-    transition: all 1.4s ease;
-  }
-  .img-side {
-    float: right;
-    width: 42%;
-    margin: 0 0 2rem 2.5rem;
-    border-radius: 3px;
-    opacity: 0;
-  }
-
-  /* ========== FINAL ========== */
-  .final {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: radial-gradient(ellipse at bottom, #2a231c 0%, #0c0b0a 70%);
-  }
-  .final h2 {
-    font-size: clamp(2rem, 6vw, 3.8rem);
-    margin-bottom: 1rem;
-    opacity: 0;
-  }
-  .final p {
-    color: var(--text-dim);
-    max-width: 480px;
-    opacity: 0;
-  }
-
-  /* mobile */
-  @media (max-width: 700px) {
-    section { padding: 8vh 5vw; }
-    .img-side { float: none; width: 100%; margin: 0 0 2rem 0; }
-  }
-</style>
 </head>
+
 <body>
 
-<div id="progress"></div>
+  <div id="progress"></div>
 
-<!-- ========== INTRO ========== -->
-<section class="intro" id="intro">
-  <h1 id="title">Ladybug</h1>
-  <p id="subtitle">Written by Eve </p>
-  <div class="scroll-hint">SCROLL</div>
-</section>
+  <!-- ========== INTRO ========== -->
+  <section class="intro" id="intro">
+    <h1 id="title">Ladybug</h1>
+    <p id="subtitle">Written by Eve </p>
+    <div class="scroll-hint">SCROLL</div>
+  </section>
 
-<!-- ========== KITCHEN ========== -->
-<section id="kitchen">
-  <!-- ambient water sound (starts when section enters) -->
-  <audio id="water-sound" src="audio/running-water.mp3" preload="auto" loop></audio>
-  <audio id="kettle-sound" src="audio/kettle-hiss.mp3" preload="auto"></audio>
+  <!-- ========== KITCHEN ========== -->
+  <section id="kitchen">
+    <!-- ambient water sound (starts when section enters) -->
+    <audio id="water-sound" src="audio/running-water.mp3" preload="auto" loop></audio>
+    <audio id="kettle-sound" src="audio/kettle-hiss.mp3" preload="auto"></audio>
 
-  <div class="section-inner">
+    <div class="section-inner">
 
-    <!-- ========== 1. SINK + FIRST NARRATION (together) ========== -->
-    <div class="sink-scene" id="sink-scene">
-      <div class="water-reveal" id="water-reveal">
-        <!-- the final solid image (fades in after fragments land) -->
-        <img src="images/sink.jpg" alt="Leila washing a cup" class="sink-img" id="img-sink">
+      <!-- ========== 1. SINK + FIRST NARRATION (together) ========== -->
+      <div class="sink-scene" id="sink-scene">
+        <div class="water-reveal" id="water-reveal">
+          <!-- the final solid image (fades in after fragments land) -->
+          <img src="images/sink.jpg" alt="Leila washing a cup" class="sink-img" id="img-sink">
 
-        <!-- 12 horizontal fragments that fall into place from bottom to top -->
-        <div class="fragment" style="top: 0%;    height: 8.333%; background-position: 0 0%;"></div>
-        <div class="fragment" style="top: 8.333%; height: 8.333%; background-position: 0 8.333%;"></div>
-        <div class="fragment" style="top: 16.666%;height: 8.333%; background-position: 0 16.666%;"></div>
-        <div class="fragment" style="top: 25%;   height: 8.333%; background-position: 0 25%;"></div>
-        <div class="fragment" style="top: 33.333%;height: 8.333%; background-position: 0 33.333%;"></div>
-        <div class="fragment" style="top: 41.666%;height: 8.333%; background-position: 0 41.666%;"></div>
-        <div class="fragment" style="top: 50%;   height: 8.333%; background-position: 0 50%;"></div>
-        <div class="fragment" style="top: 58.333%;height: 8.333%; background-position: 0 58.333%;"></div>
-        <div class="fragment" style="top: 66.666%;height: 8.333%; background-position: 0 66.666%;"></div>
-        <div class="fragment" style="top: 75%;   height: 8.333%; background-position: 0 75%;"></div>
-        <div class="fragment" style="top: 83.333%;height: 8.333%; background-position: 0 83.333%;"></div>
-        <div class="fragment" style="top: 91.666%;height: 8.333%; background-position: 0 91.666%;"></div>
+          <!-- 12 horizontal fragments that fall into place from bottom to top -->
+          <div class="fragment" style="top: 0%;    height: 8.333%; background-position: 0 0%;"></div>
+          <div class="fragment" style="top: 8.333%; height: 8.333%; background-position: 0 8.333%;"></div>
+          <div class="fragment" style="top: 16.666%;height: 8.333%; background-position: 0 16.666%;"></div>
+          <div class="fragment" style="top: 25%;   height: 8.333%; background-position: 0 25%;"></div>
+          <div class="fragment" style="top: 33.333%;height: 8.333%; background-position: 0 33.333%;"></div>
+          <div class="fragment" style="top: 41.666%;height: 8.333%; background-position: 0 41.666%;"></div>
+          <div class="fragment" style="top: 50%;   height: 8.333%; background-position: 0 50%;"></div>
+          <div class="fragment" style="top: 58.333%;height: 8.333%; background-position: 0 58.333%;"></div>
+          <div class="fragment" style="top: 66.666%;height: 8.333%; background-position: 0 66.666%;"></div>
+          <div class="fragment" style="top: 75%;   height: 8.333%; background-position: 0 75%;"></div>
+          <div class="fragment" style="top: 83.333%;height: 8.333%; background-position: 0 83.333%;"></div>
+          <div class="fragment" style="top: 91.666%;height: 8.333%; background-position: 0 91.666%;"></div>
+        </div>
+
+        <div class="falling-narration" id="falling-narration">
+          <p class="line">Leila, a skinny twenty year old black girl is washing a cup on the sink,</p>
+          <p class="line">the hissing sound of a kettle at the background.</p>
+          <p class="line">While she does this, she's talking to the walls...</p>
+        </div>
       </div>
 
-      <div class="falling-narration" id="falling-narration">
-        <p class="line">Leila, a skinny twenty year old black girl is washing a cup on the sink,</p>
-        <p class="line">the hissing sound of a kettle at the background.</p>
-        <p class="line">While she does this, she's talking to the walls...</p>
-      </div>
-    </div>
+      <!-- ========== 2. SELF-TALK (talking to the walls) ========== -->
+      <div class="walls-talk story-block" id="walls-talk">
+        <div class="wall-texture"></div>
+        <div class="echo-container">
+          <span class="character leila-name">Leila</span>
+          <p class="echo-line" data-delay="0">Me? Do it? No I...I possibly could not.</p>
+          <p class="echo-line" data-delay="0.4">Even though I want to... I can't, I'm not strong enough...</p>
 
-    <!-- ========== 2. SELF-TALK (talking to the walls) ========== -->
-    <div class="walls-talk story-block" id="walls-talk">
-      <div class="wall-texture"></div>
-      <div class="echo-container">
-        <span class="character leila-name">Leila</span>
-        <p class="echo-line" data-delay="0">Me? Do it? No I...I possibly could not.</p>
-        <p class="echo-line" data-delay="0.4">Even though I want to... I can't, I'm not strong enough...</p>
-        
+        </div>
       </div>
-    </div>
 
-    <div>
-      <p class="line">She turns and places the cup on a tray.</p>
-      <p class="line">Then places a small plate on the same tray,</p>
-      <p class="line">opens a cabinet, takes out a packet of two scones and closes the empty cabinet.</p>
-    </div>
-
-    <div class="walls-talk story-block" id="walls-talk">
-      <div class="wall-texture"></div>
-      <div class="echo-container">
-        <span class="character leila-name">Leila</span>
-        <p class="echo-line" data-delay="1.3">Oh dear, these won't be enough will they?</p>
-        <p class="echo-line" data-delay="1.8">Well, you know how the economy is....but... if you ask me I think this is good...</p>
-        <p class="echo-line" data-delay="2.3">you know...us girls, we aren't supposed to be eating a lot.</p>
-        <p class="echo-line" data-delay="2.7">We have to maintain a slim figure you know?</p>
+      <div>
+        <p class="line">She turns and places the cup on a tray.</p>
+        <p class="line">Then places a small plate on the same tray,</p>
+        <p class="line">opens a cabinet, takes out a packet of two scones and closes the empty cabinet.</p>
       </div>
-    </div>
 
-    <div>
-      <p class="line">She drops the scones on the plate.</p>
-    </div>
-    <!-- ========== 3. TRAY CASCADE (4 images) ========== -->
-    <div class="tray-cascade" id="tray-cascade">
-      <div class="tray-item" data-step="1">
-        <img src="images/tray-1.jpg" alt="Empty tray">
+      <div class="walls-talk story-block" id="walls-talk">
+        <div class="wall-texture"></div>
+        <div class="echo-container">
+          <span class="character leila-name">Leila</span>
+          <p class="echo-line" data-delay="1.3">Oh dear, these won't be enough will they?</p>
+          <p class="echo-line" data-delay="1.8">Well, you know how the economy is....but... if you ask me I think this
+            is good...</p>
+          <p class="echo-line" data-delay="2.3">you know...us girls, we aren't supposed to be eating a lot.</p>
+          <p class="echo-line" data-delay="2.7">We have to maintain a slim figure you know?</p>
+        </div>
       </div>
-      <div class="tray-item" data-step="2">
-        <img src="images/tray-2.jpg" alt="Tray with plate">
-      </div>
-      <div class="tray-item" data-step="3">
-        <img src="images/tray-3.jpg" alt="Tray with scones">
-      </div>
-    </div>
 
-    <!-- ========== 4. SECOND SELF-TALK ========== -->
-    <div class="story-block self-talk">
-      <span class="character leila-name">Leila (cont'd)</span>
-      Oh I love coffee, it's a diuretic. It has caffeine so you don't really get hungry...actually coffee doesn't dehydrate the body, even though caffeine makes you pee more, there's a higher water content in your cup of coffee than the amount your body loses...<br><br>
-      Cigarettes? No I can't smoke cigarrettes the witch won't let me.
-    </div>
+      <div>
+        <p class="line">She drops the scones on the plate.</p>
+      </div>
+      <!-- ========== 3. TRAY CASCADE (4 images) ========== -->
+      <div class="tray-cascade" id="tray-cascade">
+        <div class="tray-item" data-step="1">
+          <img src="images/tray-1.jpg" alt="Empty tray">
+        </div>
+        <div class="tray-item" data-step="2">
+          <img src="images/tray-2.jpg" alt="Tray with plate">
+        </div>
+        <div class="tray-item" data-step="3">
+          <img src="images/tray-3.jpg" alt="Tray with scones">
+        </div>
+      </div>
 
-    <!-- ========== 5. KETTLE RAPTURE ========== -->
-    <div class="kettle-rapture" id="kettle-rapture">
-      <img src="images/kettle.jpg" alt="Kettle boiling" class="kettle-img" id="img-kettle">
-      <div class="rapture-flash"></div>
+      <!-- ========== 4. SECOND SELF-TALK ========== -->
+      <div class="story-block self-talk">
+        <span class="character leila-name">Leila (cont'd)</span>
+        Oh I love coffee, it's a diuretic. It has caffeine so you don't really get hungry...actually coffee doesn't
+        dehydrate the body, even though caffeine makes you pee more, there's a higher water content in your cup of
+        coffee than the amount your body loses...<br><br>
+        Cigarettes? No I can't smoke cigarrettes the witch won't let me.
+      </div>
+
+      <!-- ========== 5. KETTLE RAPTURE ========== -->
+      <div class="kettle-rapture" id="kettle-rapture">
+        <img src="images/kettle.jpg" alt="Kettle boiling" class="kettle-img" id="img-kettle">
+        <div class="rapture-flash"></div>
+        <p class="narration kettle-text">
+          By now the kettle is hissing to it's fullest, then suddenly it clicks off.<br>
+          Which brings Leila back to the present.<br>
+          She then takes the kettle and pours the boiling water on the cup that was on the tray.
+        </p>
+      </div>
+
+      <div class="tray-cascade" id="tray-cascade">
+        <div class="tray-item" data-step="2">
+          <img src="images/tray-3.jpg" alt="Tray with plate">
+        </div>
+        <div class="tray-item" data-step="3">
+          <img src="images/tray-4.jpg" alt="Tray with scones">
+        </div>
+      </div>
+
       <p class="narration kettle-text">
-        By now the kettle is hissing to it's fullest, then suddenly it clicks off.<br>
-        Which brings Leila back to the present.<br>
-        She then takes the kettle and pours the boiling water on the cup that was on the tray.<br>
         Then carrying the tray, she walks out of the kitchen.
       </p>
     </div>
-
-  </div>
-</section>
-
-<section></section>
-
-<!-- ========== BEDROOM 1 ========== -->
-<section id="bedroom">
-  <div class="section-inner">
-    <div class="story-block">
-      <p class="narration">Leila appears holding a tray.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What took you so long?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">An old sick woman is lying on the bed. Delilah has eczema and a couple of radiation scars on her skin. Her thiny brown hair barely covers her head.<br><br>
-      Leila places the tray on the bed.</p>
-    </div>
-    
-    <img src="images/tray-bed.png" alt="tray in bed" class="img-full" id="img-tray">
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I was waiting for the kettle to boil the water.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Come fix this pillows.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila goes ahead.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah (cont'd)</span>
-      <p class="dialogue">Help me up...<br>Bring that tray here...<br>Does this have sugar?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">YES!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">How many tablespoons?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Two!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">How many tablespoons of coffee did...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">One!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Why do these scones not have jelly on them?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">We ran out of jelly.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What? When?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Two weeks ago.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Delilah takes a sip of the coffee.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">This is too hot, why didn't you wait for it to cool down.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila rolls her brown eyes.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I guess I forgot.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You guess you forgot?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Yes?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">That forgetfulness of yours is the reason you keep failing in school...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">(whispers to herself) School?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah (cont'd)</span>
-      <p class="dialogue">This scones are fucking tasteless, just like the bread before. I've experienced three wars in my lifetime, counting this one and in every single one of them, the breads are always tasteless. It's as if all the good bakers get taken down and only the amateurs are left to feed us.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Those are the last scones.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What do you mean?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">We have run out.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Why didn't you tell me this?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I did, yesterday, and the day before... and the day before.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Huh... (a long pause as she continues eating). Well I don't need it anyway. It won't cure me from dying. Maybe I should stop eating altogether and quicken the process...you'd love that wouldn't you?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Love what?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">My God you are a slow child...if i knew how slow you'd be I would have left you at that orphanage...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila looks hurt.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">...sorry that was mean...I'm just...hateful towards life...not you...never you.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Yeah...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Here do you want some?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She hands her the plate which has the leftover piece from the first scone, then takes the next piece for herself. Leila takes the scone and eats it. After a moment, she takes the plate to the kitchen.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== KITCHEN 2 ========== -->
-<section id="kitchen2">
-  <div class="section-inner">
-    <img src="images/empty-cabinets.jpg" alt="Empty cabinets" class="img-full" id="img-cabinets">
-
-    <div class="story-block">
-      <p class="narration">She places the plate on the sink.</p>
-    </div>
-
-    <div class="story-block self-talk">
-      <span class="character leila-name">Leila</span>
-      Okay, I'll tell her...She might agree, we don't have the money...we can't go on like this... I am 20 years old, and that means I'm an adult and I can perfectly handle a job...<br><br>
-      Besides when have I ever been irresponsible ....That was a long time ago. She won't say no
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah (O.S.)</span>
-      <p class="dialogue">LEILA!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">YES!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She quickly runs to the bedroom.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== BEDROOM 2 ========== -->
-<section id="bedroom2">
-  <div class="section-inner">
-    <img src="images/window-curtains.jpg" alt="Window and curtains" class="img-full" id="img-window1">
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Open the windows for me, I want to feel the sun for just one more day.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila opens the window. Cold air rushes inside, blowing the curtains aggressively.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Close it, close it. God what a gloomy day...How many gloomy days have there been?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">A lot...it's rainy season.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I know it's rainy season, you think I don't hear the rain?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">But it's not raining.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Now it's not, but it will...(quiet) What's the day today?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I don't know, probably Monday?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Urgh Monday...I hate it. Even though I'm not going to work today...What a gloomy day.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila sits at the carpet, she's trying to find the courage to speak up.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Uhm.. I was thinking that... maybe I should find a job. You know, to at least put food on the table?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Long pause. Delilah looks at Leila expressionless then...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">HAHAHAHAHAHAHAHAHA!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Why are you laughing?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">YOU? WORK?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Yeah!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Like in a job?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Yes...I can handle a job.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">OH really? Like what job? Tell me what job are you going to do.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">WEELLL...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Also tell me where you are going to work from? And who's going to pay you.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">No I wasn't talking about...well obviously I won't be paid money...I was thinking of volunteering at one of the centres and maybe they could give us food in exchange.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Oh...that sounds very smart, yeah! But the problem isn't the job, the problem is, do you have the courage to do it? Can you even talk to someone else who isn't me? Can you even look them in the eyes while talking to them, or will you stammer like always?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila goes quiet. She doesn't have an answer to that. She doesn't know if she really has the courage to do it. A minute passes. Delilah has now finished the last scone and her coffee.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah (cont'd)</span>
-      <p class="dialogue">Go add me some more coffee and one scone.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">There's no more scones, mom.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Delilah closes her eyes.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">GOD, when will the war end?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">It already did.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila takes the tray to the kitchen as Delilah goes quiet, half awake.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== KITCHEN 3 ========== -->
-<section id="kitchen3">
-  <div class="section-inner">
-    <div class="story-block self-talk">
-      <span class="character leila-name">Leila</span>
-      Well, I tried didn't I?<br><br>
-      What am I going to eat?..... Yes I know I said that but now I'm hungry!
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She opens some more cabinets, they are all empty. She makes coffee for herself with the remaining hot water and starts drinking it.</p>
-    </div>
-
-    <div class="story-block self-talk">
-      Outside? Nooo...It's raining...You know I wonder, If I go outside, will she remember I did?... Yes she'll forget. I could ran away and I won't be in trouble coz she might even forget about me, right?...no....if I do that then she'll die alone. All alone. That's really sad and I don't want that for her.
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah (O.S.)</span>
-      <p class="dialogue">LEILA!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila rolls her eyes then runs to the bedroom.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== BEDROOM 3 – PHILOSOPHY ========== -->
-<section id="philosophy">
-  <div class="section-inner">
-    <img src="images/tv-cds.jpg" alt="Old TV and CDs" class="img-full" id="img-tv">
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Where's my coffee?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila looks guilty. She looks over to the kitchen and back to her mother.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">There's none left.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I'll be damned.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila stands at the door awkwardly as the silence falls again. Then Delilah shifts her gaze to her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Why do you talk to yourself child?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">What?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You talk to yourself. I always hear you mumbling things in the kitchen.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Oh. No. No I don't talk to myself.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Do you have imaginary friends that you talk to?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Imaginary friends?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Yes.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">No, no I don't have friends. Imaginary friends.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Then who are you talking to when you're in the kitchen? Are you mad?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I didn't know I was talking to someone. It's just something I do, you know, like make a story in my head and pretend I'm in the story.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">So, you are mad!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">No, I'm not.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Okay come here child...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila slowly walks closer to her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Closer... lay beside me...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She does, awkwardly.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Do you know why I picked you that day?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Because our names rhyme?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Yes Delilah and Leila rhyme,</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She smiles, Leila is now lying on her laps.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I remember when I first saw you...You were just five and you had these big eyes and of all the kids, you were the one who didn't smile at me. And I thought, what's this little shit's fucking problem? Does she not know that I'm the one who can save her from the pitiful life she's about to have? Then I realized, she's just five, what does she know about life. I asked you what your name was and you said Leila, but I can call you whatever I like. What did I say to you?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I will call you Leila, because I like it and it rhymes with my name.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">And then you asked me what my name was.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">And you said DELILAH.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">That shocked you and you said, 'DELILAH? LIKE THE WOMAN WHO CUT SAMSON'S HAIR?', you were so adorable. I told you no, I told you that was a fable. you didn't understand of course, but I had already decided that from that day I would be your mother...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She goes quiet as if she forgot what she was planning to say. Leila gets bored and speaks up.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Mom, I want to go outside maybe I'll find something to eat.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Why do you want to eat?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I'm hungry?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Why are you hungry?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I don't know mom, I JUST AM!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You are hungry because you want to stay alive.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I think I just want pancakes.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">No listen...you never listen to me child....Why do you want to stay alive? Why do you want to go outside? There's nothing there. There's nothing but death there.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">But the voluntering centre has no death there. It has food and there's people and...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I know you find that exciting, God knows how much trouble you gave me when I took you there...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">(quickly interrupts) Please take me again, I promise this time I'll behave and I won't refuse to leave, please please!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You know I don't have the strength to.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Then I can...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">No stay here with me... That place seduces you with food and you think that's what life is about, but it's not. It's just illusion, it masks the death that's underneath it and calls it survival. Do you like staying alive?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Yes?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Really? What is it about life that you like so much? Is it this pathetic world we live in? Is it how you are stuck here and you can't leave? Is it that your mother is dying of cancer and you have to take care of her? Do you like that you have no friends, and not enough food?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila stands up from the bed, angry.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">STOP! I know what you are trying to do! You don't want me to leave because you want me to die here with you and I wont!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Nooo...that's not what I want! A mother wants nothing but life for her child...But there is no life in this world, my dear. The radiation took all of it. Have you ever seen an elephant? Have you ever seen fish? What about flowers? And don't you say you've seen them on movies coz it's not the same.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila's face is shedding tears now.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Okay don't cry, there's no need to cry...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila continues to sob.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">How would you like to watch tv? huh?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila slowly nods.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I know you like that...come on set it up.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila slowly but excitedly goes to where the tv is and switches it on. She takes out a folder with cds and next to it there's headphones and a music player. She takes one of the cds and puts it in the player. She joins her mother in the bed as the movie starts.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">How many times have we seen this movie?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">A lot...I love it.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You know everyone who acted in the movie is dead.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Everyone?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Not a single one is alive.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Mom...why do you always talk about death?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Coz it's all there is now.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">But it's not, you're still alive, I'm still alive.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">We are not alive darling, we just have our eyes open.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I don't...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">When you talk to your imaginary friends or have those fantasies in your head, do you think that's what's happening in the present moment? In the real world?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila turns away from the tv and looks at her mom.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Do you think those thoughts in your head are real? Or are you just making them up?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila is confused.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You think life is like the fantasies in your head? You want to stay alive so that you can keep having these fantasies.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">No...I don't have fantasies.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Oh my poor child.. You are mad and you don't know it...you are mad. You have nothing but thoughts constantly swimming in your head, you make up stories and create ideas that aren't even real... Tell me, can you stop your mind from thinking?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Thinking?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Yes.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Like stop thinking?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Yes!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I can't! That doesn't even make sense.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Why does it not make sense, can you do it or not?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Well, of course I can't. Thinking is what humans should always do. They should think before doing something or saying something.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What about when you think too much? Do you think you should stop?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">See, you just asked me if I think. Meaning I can't stop thinking.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Okay, fine you can't stop thinking...but what is it you are thinking about?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Right now?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">YES.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I don't know, nothing I guess.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">So you don't know what you are thinking yet you can't stop thinking?...Okay so who is thinking, who is doing the thinking?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I'm the one thinking, it's my brain.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Are you sure? What about when you're talking with your imaginary friends? Is that you doing the thinking or is there someone else.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila gets quiet and contemplates, the tv noise is now in the background.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You are mad. You talk to yourself, you live in a fantasy. You can't control your thoughts and you think that your thoughts and perception of life are the truth but they are not....can't you understand? You are pretending to be alive, you are pretending to be someone you're not, you're pretending to have friends you don't have. You're pretending to be in a story that isn't real....It's all fake! All those thoughts, all those ideas, all those stories, they aren't real.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila isn't reacting, she looks confused. It's as if she's never considered this before.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You don't believe me? You think I'm a crazy woman who just always forgets everything...I forget because there's no point in remembering, there's nothing to remember...it's all empty, it's all noise, none of it is real...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She looks at leila who isn't moving.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Leila, where is your mind right now...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila doesn't speak.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Won't you speak?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I...I don't know...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I wish I could live long enough to see the day you would understand what I'm talking about, but how can you, you are just a child.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">A few minutes pass and Delilah falls asleep. Leila sits there, the noise on the tv muffles the background. She finally wakes up and goes to the kitchen.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== AWAKENING ========== -->
-<section id="awakening">
-  <div class="light-beam" id="beam"></div>
-  <div class="section-inner">
-    <div class="story-block self-talk">
-      <span class="character leila-name">Leila</span>
-      She is crazy, I mean what was that about?...Death always talking about death, if she wants it so bad...
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She stops herself as she gasps in realizaton.</p>
-    </div>
-
-    <div class="story-block self-talk">
-      I'm talking to myself...there's no one here...I'm talking to no one...<br><br>
-      There's nothing happening now... I'm just talking to myself, I'm just imagining it.
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Suddenly the tv noise goes silent, and an eerie quiet settles in. Leila suddenly gains an awareness, she starts to look around her and for the first time she notices the details in the kitchen. The faded white wood that furnished its cabinets. The black kettle that contrasted the white marble sink. The glass plates on the sink. She becomes aware of her body and starts looking at it, from her feet to her hands. To the botched skin she hated so much. The room suddenly gets vivid and she notices the window curtains were closed. She walks toward them, touches their dusty fabric and parts them wide. A bright light illuminates from the window. And she gets so entranced by it, she sheds a tear. She gets this desire to drink it, to drink the light.</p>
-    </div>
-
-    <img src="images/window-light.jpg" alt="Bright light through window" class="img-full detail-reveal" id="img-light">
-
-    <div class="story-block">
-      <p class="narration">Suddenly, she hears a bird singing, and the life that's outside her window. The buildings are rampaged, and the city is abandoned in post war architecture. She sees a red ladybug in a corner somewhere and gets fascinated by it. The breeze touches her skin and she shivers in a way that looks pleasurable. She closes her eyes and another desire comes. She wants the breeze to carry her to wherever it's going.</p>
-    </div>
-
-    <img src="images/ladybug.jpg" alt="Red ladybug" class="img-full detail-reveal" id="img-ladybug">
-
-    <div class="story-block">
-      <p class="narration">She opens her eyes after the breeze leaves. An awareness creeps in, we see it in her eyes. She moves away from the window and walks to her mother's bedroom, carrying that same awareness.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== CONFRONTATION ========== -->
-<section id="confrontation">
-  <div class="section-inner">
-    <img src="images/leila-eyes.jpg" alt="Leila's eyes" class="img-full" id="img-eyes">
-
-    <div class="story-block">
-      <p class="narration">She stops at the door, she looks around the room, at the tv, at the bed. She looks at her mother for the first time. She really looks at her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">MOM?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Delilah opens her eyes. Leila walks closer but stops just before reaching the bed.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I'm leaving!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Not this again!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">No! I'm serious.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She walks towards her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I finally understand what you meant...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She sits down and looks at her mother straight in the eyes. This startles Delilah.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I have been fantasizing about life, it was all in my head. My dreams, my thoughts, my feelings...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What has happened?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Delilah looks at the new person sitting next to her. She has these big eyes that looked like they just witnessed a miracle.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I'm leaving you...You are dying and you seem to be fine with that. But I don't want to die, I want to live. And yes I have never seen an elephant coz there's no life out there but just now I saw a ladybug and it's the most beautiful thing I have ever laid my eyes upon. I know there's not much out there, but if something like that ladybug is out there then that's where I want to be. I want to live and see many more ladybugs and I can't do that here.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Stop this nonsense.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue scream-echo" id="scream">I AM SERIOUS! THIS ISN'T NONSENSE. I AM LEAVING AND YOU WILL NEVER EVER SEE ME AGAIN!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">AND WHERE WILL YOU GO?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">ANYWHERE THAT'S NOT HERE!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">YOU'RE FUCKING DELUSIONAL</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I DON'T CARE!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She screams, like all her breath came out with those words. The echo of her scream takes its time in the room, then disappears. Delilah softens.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Okay, if you want to go to the volunteering center, you can go. I have given you permission. Bring lots of bread, not the scones.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila looks confused, her outburst hasn't cooled off yet.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Really?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Yeah...Just make sure you come back before night falls.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila stands up excited. She hugs her mother.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">OH thank you thank you thank you!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Delilah hugs her back, smiling. Leila breaks the hug and starts to leave.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Before you go, can you apply that lotion on me.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila looks at the lotion standing next to her mother's bedside table. This is the lotion they all apply to help neutralize the effects of the radiation. She fights the urge to walk out and picks up the lotion instead.<br><br>
-      She begins applying the lotion to her mother's skin.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Since you are going to the center, do you remember the way there?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I think so.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You don't remember. Aren't you going to get lost?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I won't.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What if the center is closed?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila stops applying the lotion. She looks at Delilah and finally understands what was happening. She gets up and distances herself from her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What now?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila starts pacing around the bedroom, trying to find the words that best describe her feelings.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You are a selfish person...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">What?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You are a selfish person, you're so selfish....You don't want me to go. Well I will and you can't stop me. I'm leaving and I'm never coming back!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">There's a pause as Delilah tries to understand the situation.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You want to abandon me?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Yes! You want to die, I'm not going to...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">(interrupts) Why don't you just kill me? Kill me and get your freedom.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">What? Why are you...</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">No go ahead, Kill me. I have given you permission. Kill me. Do it, God will forgive you. In fact who am I kidding, he doesn't care if you do it. So go ahead, kill me and go to that place you like so much.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila walks to the door. Delilah gets irrational and starts shouting at her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Kill me you fucking coward!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila turns around and walks towards her.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You know what I just realized...you didn't pick me because our names rhymed or you liked me and wanted to care for me. You picked me because you didn't want to live alone, and what better way than to adopt an unwanted child from the orphanage right?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">I picked you coz you needed me, you needed a mother.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You were never my mother, I was just a maid to you, a companion you can order around and tell stories about your past to. You were never my mother!</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Delilah is in shock, there's a creeping block in her emotions and she can't remove it. She can't believe this is happening.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">You won't survive out there.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">Let me worry about that...</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila walks to the door but stops and turns around again.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">you know...now that I think or now that I see things more clearly, I don't know why I was so afraid. Of you, of outside and of life. Nothing's ever happened to me, yet I have always been scared and anxious. I'm still alive after all this time, all the things I have feared, none of them ever happened, all the things I've wished for, they never happened. It was all in my head. It was all in my head!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">YES! It was all in your head! That's what I have been telling you all this fucking time. But just because you finally know that, doesn't mean you have the power to live life the way you want it. You don't, you are weak, life will swallow you up and spit you out, over and over again...Oh you think because the illusion has gone, life will suddenly start to favor you? Because you're aware now? Because you're enlightened?</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">I don't know what you're talking about and I don't care.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Of course you don't, you're just in the beginning. I'll tell you what, you can go, you can leave. Go have a life... And one day, you will realize that I was never your enemy, I was never the one holding you prisoner.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You can't talk me out of it. I know you think I hate you but I don't.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Bullshit! You think I've never heard you debate with yourself whether or not you should kill me?</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila is taken aback!</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">Haha! You mad child, your echoes reach this room all the time...But you know what, I wanted you to do it. God how I waited for you to do it, to take me out of my misery, if I had the strength to move my hands I would have done it already. Unlike you, you are such a fucking coward, you'd rather wipe my shit than put a knife to my chest.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">Leila feels a weird emotion swelling inside her chest. She doesn't know what it is.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character delilah-name">Delilah</span>
-      <p class="dialogue">And somehow you think you can survive out there? When you can't do something as simple as that? When you can't even slay the witch who is the only mother you'll ever have? That's right, I'm the only mother you'll ever have, because the one who gave birth to you, didn't want you. And If I'm honest, I don't blame her, look at you. You're an ugly child. I bet if she knew how ugly and mad you'd turn out to be, she wouldn't have given birth to you in the first place.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">The emotion that was swelling in Leila's chest, like a lightning bolt, ascends to her head and takes away every thought in her brain. Then it takes over her body, and she moves to the bed, jumping on top of it. She yanks one of the pillows and with a strength only seen in animals, she places the pillow over the witch's face. She pushes the pillow down and down. Her mother's frail body fights back but Leila continues pushing. Down and Down. The body keeps moving. Down and Down she pushes. Down and Down until finally the witch no longer moves.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">The emotion subsides as quickly as it had ascended, and Leila's eyes are no longer blinded by it. She takes away the pillow from her mother's face.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">The witch's dead face doesn't surprise her. It still has the same dead hazel eyes that always looked down on her. Leila gets up from the bed.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You wanted to die...so there...you're welcome.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She walks away to the door and through the corridor to her room.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== ESCAPE ========== -->
-<section id="escape">
-  <div class="section-inner">
-    <img src="images/suitcase.jpg" alt="Suitcase" class="img-full" id="img-suitcase">
-
-    <div class="story-block">
-      <p class="narration">She opens her wardrobe. There's a suitcase there. She lifts the suitcase up and rolls it on the floor, walking to her late mother's room.</p>
-    </div>
-
-    <div class="story-block">
-      <span class="character leila-name">Leila</span>
-      <p class="dialogue">You don't know how long I've been waiting for this.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She looks at her dead mother once more. She tries to feel something in her heart, but just like her head, there's nothing there. Her eyes catch the headphones and the music player that's next to the tv desk. The movie in the tv is now showing the credit sequence. She walks to the desk and picks up the headphones and music player. It was an old one, a gift she got at the orphange from someone she no longer remembers. She puts the headphones on and connects the wire to the player. She scrolls through the catalogue of music displayed on the small device and presses play on one of them.</p>
-    </div>
-
-    <img src="images/headphones.jpg" alt="Old headphones and music player" class="img-full" id="img-music">
-
-    <div class="story-block">
-      <p class="narration">The music starts, she walks to her mother, takes a blanket and covers her body. Then she takes her suitcase and drags it out of the apartment. The outside looked the same way as she had always seen it from the window. But now it felt different. She begins walking away from the old house she had called home for over a decade. The music is almost at a climax and Leila can feel it in her bones. The freedom in her bones. As she walked further away and into the unknown, she started dancing and singing to the music. Laughing, Jumping.</p>
-    </div>
-
-    <div class="story-block">
-      <p class="narration">She almost looked mad while doing it.</p>
-    </div>
-
-    <div class="freedom-text" id="freedom">It was all in my head.</div>
-
-    <div class="dance" id="dance">
-      <span>✦</span><span>✦</span><span>✦</span>
-    </div>
-
-    <img src="images/leila-walking.jpg" alt="Leila walking into the ruins" class="img-full" id="img-walking">
-  </div>
-</section>
-
-<!-- ========== FINAL ========== -->
-<section class="final" id="final">
-  <h2 id="final-title">Ladybug</h2>
-</section>
-
-<script>
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Progress bar
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    const scrolled = (window.scrollY / h) * 100;
-    document.getElementById('progress').style.width = scrolled + '%';
-  });
-
-  // Intro animation
-  gsap.to('#title', { opacity: 1, y: 0, duration: 1.8, ease: 'power3.out', delay: 0.3 });
-  gsap.to('#subtitle', { opacity: 1, duration: 1.4, delay: 1.1 });
-
-  // Reveal all story blocks on scroll
-  gsap.utils.toArray('.story-block').forEach((block) => {
-    gsap.to(block, {
-      opacity: 1,
-      y: 0,
-      duration: 1.1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: block,
-        start: 'top 88%',
-        toggleActions: 'play none none none'
-      }
-    });
-  });
-
-  // Images
-  gsap.utils.toArray('.img-full').forEach((img) => {
-    gsap.to(img, {
-      opacity: 1,
-      y: 0,
-      duration: 1.4,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: img,
-        start: 'top 85%',
-        toggleActions: 'play none none none'
-      }
-    });
-  });
-
-  // ========== KITCHEN EFFECTS ==========
-  const waterAudio = document.getElementById('water-sound');
-
-  // Water sound + sink reveal
-  ScrollTrigger.create({
-    trigger: '#sink-scene',
-    start: 'top 85%',
-    end: 'bottom 20%',
-    onEnter: () => {
-      waterAudio.currentTime = 0;
-      waterAudio.volume = 0.35;
-      waterAudio.play().catch(()=>{});
-    },
-    onLeave: () => {
-      gsap.to(waterAudio, { volume: 0, duration: 1.2, onComplete: () => waterAudio.pause() });
-    },
-    onEnterBack: () => {
-      waterAudio.volume = 0.35;
-      waterAudio.play().catch(()=>{});
-    },
-    onLeaveBack: () => {
-      gsap.to(waterAudio, { volume: 0, duration: 0.8, onComplete: () => waterAudio.pause() });
-    }
-  });
-
-  // ========== SLOW FRAGMENT SOLIDIFY (bottom → top) ==========
-  const fragments = gsap.utils.toArray('.fragment');
-
-  // reverse order so bottom fragments land first
-  const ordered = [...fragments].reverse();
-
-  ordered.forEach((frag, i) => {
-    gsap.to(frag, {
-      opacity: 1,
-      y: 0,
-      scaleY: 1,
-      filter: 'blur(0px)',
-      duration: 2.8,                    // each piece takes almost 2 seconds
-      delay: i * 0.5,                  // big gap between pieces → very slow cascade
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#sink-scene',
-        start: 'top 82%',
-        toggleActions: 'play none none reverse'
-      }
-    });
-  });
-
-  // after all fragments have landed, gently solidify the real image
-  gsap.to('#img-sink', {
-    opacity: 1,
-    duration: 2.2,
-    delay: ordered.length * 0.38 + 0.6, // waits for the last fragment
-    ease: 'power1.inOut',
-    scrollTrigger: {
-      trigger: '#sink-scene',
-      start: 'top 82%',
-      toggleActions: 'play none none reverse'
-    }
-  });
-
-  // ========== MUCH SLOWER FALLING NARRATION ==========
-  gsap.utils.toArray('.falling-narration .line').forEach((line, i) => {
-    gsap.to(line, {
-      opacity: 1,
-      y: 0,
-      filter: 'blur(0px)',
-      duration: 2.8,                    // each line takes 2.8 s
-      delay: 1.8 + i * 0.85,            // long pause between lines
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#sink-scene',
-        start: 'top 78%',
-        toggleActions: 'play none none reverse'
-      }
-    });
-  });
-
-  // Walls self-talk – staggered echo appearance
-  gsap.utils.toArray('.echo-line').forEach((line) => {
-    const delay = parseFloat(line.dataset.delay) || 0;
-    gsap.to(line, {
-      opacity: 1,
-      x: 0,
-      duration: 2.0,
-      delay: delay,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#walls-talk',
-        start: 'top 80%',
-        toggleActions: 'play none none reverse'
-      }
-    });
-    gsap.to(line.querySelector('::before') || line, {
-      scale: 1,
-      duration: 0.6,
-      delay: delay + 0.15,
-      scrollTrigger: {
-        trigger: '#walls-talk',
-        start: 'top 80%'
-      }
-    });
-  });
-
-  // Tray cascade – falling stairs
-  gsap.utils.toArray('.tray-item').forEach((item, i) => {
-    gsap.to(item, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 3,
-      delay: 2.8 + i * 1.85,
-      ease: 'back.out(1.4)',
-      scrollTrigger: {
-        trigger: '#tray-cascade',
-        start: 'top 78%',
-        toggleActions: 'play none none reverse'
-      }
-    });
-  });
-
-  // Kettle rapture – sudden appearance + sound
-  ScrollTrigger.create({
-    trigger: '#kettle-rapture',
-    start: 'top 75%',
-    once: true,
-    onEnter: () => {
-      // visual
-      gsap.to('#kettle-rapture', {
-        opacity: 1,
-        scale: 1,
-        duration: 0.7,
-        ease: 'back.out(2)'
-      });
-      gsap.fromTo('.rapture-flash', 
-        { opacity: 0, scale: 0.3 },
-        { opacity: 5, scale: 1.6, duration: 0.5, ease: 'power2.out',
-          onComplete: () => gsap.to('.rapture-flash', { opacity: 0, duration: 1.2 })
-        }
-      );
-      gsap.to('.kettle-img', {
-        boxShadow: '0 0 80px rgba(196,92,58,0.45)',
-        duration: 0.8
-      });
-    }
-  });
-  // ========== KETTLE AUDIO – starts earlier, ends after image leaves ==========
-  const kettleAudio = document.getElementById('kettle-sound');
-
-  // Start the hiss when the previous division (tray cascade) comes into view
-  ScrollTrigger.create({
-    trigger: '#tray-cascade',          // ← previous division
-    start: 'top 80%',
-    onEnter: () => {
-      kettleAudio.currentTime = 0;
-      kettleAudio.volume = 0;
-      kettleAudio.play().catch(()=>{});
-      // gentle fade-in
-      gsap.to(kettleAudio, { volume: 0.55, duration: 1.5, ease: 'power1.out' });
-    },
-    onEnterBack: () => {
-      kettleAudio.volume = 0.55;
-      kettleAudio.play().catch(()=>{});
-    }
-  });
-
-  // Stop / fade out only after the kettle image has left the viewport
-  ScrollTrigger.create({
-    trigger: '#kettle-rapture',
-    start: 'bottom 10%',               // when the bottom of the kettle section is near the top of the screen
-    onLeave: () => {
-      gsap.to(kettleAudio, {
-        volume: 0,
-        duration: 1.1,
-        ease: 'power1.in',
-        onComplete: () => kettleAudio.pause()
-      });
-    },
-    onEnterBack: () => {
-      // if user scrolls back up, restore sound
-      kettleAudio.volume = 0.55;
-      kettleAudio.play().catch(()=>{});
-    }
-  });
-
-  // Light beam & detail reveal
-  ScrollTrigger.create({
-    trigger: '#awakening',
-    start: 'top 60%',
-    onEnter: () => {
-      document.getElementById('beam').classList.add('active');
-      document.querySelectorAll('.detail-reveal').forEach(el => el.classList.add('visible'));
-    }
-  });
-
-  // Scream
-  gsap.to('#scream', {
-    opacity: 1,
-    scale: 1,
-    duration: 1.2,
-    ease: 'back.out(1.4)',
-    scrollTrigger: {
-      trigger: '#scream',
-      start: 'top 80%'
-    }
-  });
-
-  // Freedom text + dance
-  gsap.to('#freedom', {
-    opacity: 1,
-    duration: 2,
-    ease: 'power2.out',
-    scrollTrigger: {
-      trigger: '#freedom',
-      start: 'top 75%'
-    }
-  });
-  gsap.to('#dance', {
-    opacity: 1,
-    duration: 1.5,
-    delay: 0.6,
-    scrollTrigger: {
-      trigger: '#dance',
-      start: 'top 80%'
-    }
-  });
-
-  // Final
-  gsap.to('#final-title', {
-    opacity: 1,
-    duration: 1.8,
-    scrollTrigger: { trigger: '#final', start: 'top 60%' }
-  });
-  gsap.to('#final-sub', {
-    opacity: 1,
-    duration: 1.5,
-    delay: 0.4,
-    scrollTrigger: { trigger: '#final', start: 'top 60%' }
-  });
-
-  // Subtle parallax on images
-  gsap.utils.toArray('.img-full').forEach((img) => {
-    gsap.to(img, {
-      yPercent: -8,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: img,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true
-      }
-    });
-  });
-</script>
+  </section>
+
+  <section></section>
+
+  <!-- ========== BEDROOM 1 ========== -->
+  <section id="bedroom">
+    <div class="section-inner type-stage">
+
+      <div class="type-block narration">
+        <p>Leila appears in the bedroom holding a tray.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">What took you so long?</p>
+      </div>
+
+      <div class="type-block narration wide">
+        <p class="small">Leila places the tray on the bed.</p>
+      </div>
+
+      <div class="type-block image-block">
+        <img src="images/tray-bed.png" alt="Tray on the bed" class="type-img">
+      </div>
+
+      <div class="type-block narration wide">
+        <p>
+          An old sick woman is lying on the bed.<br>
+          Delilah has eczema and a couple of radiation scars on her skin.<br>
+          Her thin brown hair barely covers her head.
+        </p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">I was waiting for the kettle to boil the water.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">Come fix this pillows.</p>
+      </div>
+
+      <div class="type-block narration">
+        <p>Leila goes ahead.</p>
+      </div>
+
+      <div class="type-block delilah cascade">
+        <span class="name">Delilah</span>
+        <p class="line sharp">Help me up...</p>
+        <p class="line sharp delay">Bring that tray here...</p>
+        <p class="line sharp delay">Does this have sugar?</p>
+      </div>
+
+      <div class="type-block leila shout">
+        <span class="name">Leila</span>
+        <p class="line explode">YES!</p>
+      </div>
+
+      <div class="type-block exchange">
+        <div class="pair">
+          <span class="name delilah-name">Delilah</span>
+          <p class="line sharp small">How many tablespoons?</p>
+        </div>
+        <div class="pair reply">
+          <span class="name leila-name">Leila</span>
+          <p class="line soft small">Two!</p>
+        </div>
+        <div class="pair">
+          <span class="name delilah-name">Delilah</span>
+          <p class="line sharp small">How many tablespoons of coffee did...</p>
+        </div>
+        <div class="pair reply">
+          <span class="name leila-name">Leila</span>
+          <p class="line explode">One!</p>
+        </div>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">Why do these scones not have jelly on them?</p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">We ran out of jelly.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp impact">What? When?</p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">Two weeks ago.</p>
+      </div>
+
+      <div class="type-block narration">
+        <p>Delilah takes a sip of the coffee.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">This is too hot, why didn't you wait for it to cool down.</p>
+      </div>
+
+      <div class="type-block narration">
+        <p class="action">Leila rolls her brown eyes.</p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">I guess I forgot.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">You guess you forgot?</p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft tiny">Yes?</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">That forgetfulness of yours is the reason you keep failing in school...</p>
+      </div>
+
+      <div class="type-block leila whisper">
+        <span class="name">Leila</span>
+        <p class="line whisper-text">(whispers to herself) School?</p>
+      </div>
+
+      <div class="type-block delilah long">
+        <span class="name">Delilah</span>
+        <p class="line bitter">
+          This scones are fucking tasteless, just like the bread before.<br><br>
+          I've experienced three wars in my lifetime, counting this one<br>
+          and in every single one of them, the breads are always tasteless.<br><br>
+          It's as if all the good bakers get taken down<br>
+          and only the amateurs are left to feed us.
+        </p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">Those are the last scones.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">What do you mean?</p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line explode">We have run out.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line sharp">Why didn't you tell me this?</p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">I did, yesterday, and the day before... and the day before.</p>
+      </div>
+
+      <div class="type-block delilah heavy">
+        <span class="name">Delilah</span>
+        <p class="line heavy-text">
+          Huh... <span class="pause">(a long pause)</span><br><br>
+          Well I don't need it anyway.<br>
+          It won't cure me from dying.<br>
+          Maybe I should stop eating altogether and quicken the process...<br>
+          <span class="sting">you'd love that wouldn't you?</span>
+        </p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft">Love what?</p>
+      </div>
+
+      <!-- The cut -->
+      <div class="type-block delilah crush">
+        <span class="name">Delilah</span>
+        <p class="line crush-text">
+          My God you are a slow child...<br>
+          if i knew how slow you'd be<br>
+          I would have left you at that orphanage...
+        </p>
+      </div>
+
+      <div class="type-block narration hurt">
+        <p class="hurt-text">Leila looks hurt.</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line soft-apology">
+          ...sorry that was mean...<br>
+          I'm just...hateful towards life...<br>
+          not you...never you.
+        </p>
+      </div>
+
+      <div class="type-block leila">
+        <span class="name">Leila</span>
+        <p class="line soft tiny">Yeah...</p>
+      </div>
+
+      <div class="type-block delilah">
+        <span class="name">Delilah</span>
+        <p class="line soft">Here do you want some?</p>
+      </div>
+
+      <div class="type-block image-block">
+        <img src="images/half-scone.png" alt="Tray on the bed" class="type-img">
+      </div>
+
+      <div class="type-block narration wide">
+        <p>
+          She hands her the plate which has the leftover piece from the first scone,<br>
+          then takes the next piece for herself.<br>
+          Leila takes the scone and eats it.<br>
+          After a moment, she takes the plate to the kitchen.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== KITCHEN 2 ========== -->
+  <section id="kitchen2">
+    <div class="section-inner">
+      <img src="images/empty-cabinets.jpg" alt="Empty cabinets" class="img-full" id="img-cabinets">
+
+      <div class="story-block">
+        <p class="narration">She places the plate on the sink.</p>
+      </div>
+
+      <div class="story-block self-talk">
+        <span class="character leila-name">Leila</span>
+        Okay, I'll tell her...She might agree, we don't have the money...we can't go on like this... I am 20 years old,
+        and that means I'm an adult and I can perfectly handle a job...<br><br>
+        Besides when have I ever been irresponsible ....That was a long time ago. She won't say no
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah (O.S.)</span>
+        <p class="dialogue">LEILA!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">YES!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She quickly runs to the bedroom.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== BEDROOM 2 ========== -->
+  <section id="bedroom2">
+    <div class="section-inner">
+      <img src="images/window-curtains.jpg" alt="Window and curtains" class="img-full" id="img-window1">
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Open the windows for me, I want to feel the sun for just one more day.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila opens the window. Cold air rushes inside, blowing the curtains aggressively.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Close it, close it. God what a gloomy day...How many gloomy days have there been?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">A lot...it's rainy season.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I know it's rainy season, you think I don't hear the rain?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">But it's not raining.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Now it's not, but it will...(quiet) What's the day today?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I don't know, probably Monday?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Urgh Monday...I hate it. Even though I'm not going to work today...What a gloomy day.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila sits at the carpet, she's trying to find the courage to speak up.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Uhm.. I was thinking that... maybe I should find a job. You know, to at least put food on
+          the table?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Long pause. Delilah looks at Leila expressionless then...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">HAHAHAHAHAHAHAHAHA!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Why are you laughing?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">YOU? WORK?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Yeah!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Like in a job?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Yes...I can handle a job.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">OH really? Like what job? Tell me what job are you going to do.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">WEELLL...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Also tell me where you are going to work from? And who's going to pay you.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">No I wasn't talking about...well obviously I won't be paid money...I was thinking of
+          volunteering at one of the centres and maybe they could give us food in exchange.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Oh...that sounds very smart, yeah! But the problem isn't the job, the problem is, do you
+          have the courage to do it? Can you even talk to someone else who isn't me? Can you even look them in the eyes
+          while talking to them, or will you stammer like always?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila goes quiet. She doesn't have an answer to that. She doesn't know if she really has
+          the courage to do it. A minute passes. Delilah has now finished the last scone and her coffee.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah (cont'd)</span>
+        <p class="dialogue">Go add me some more coffee and one scone.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">There's no more scones, mom.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Delilah closes her eyes.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">GOD, when will the war end?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">It already did.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila takes the tray to the kitchen as Delilah goes quiet, half awake.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== KITCHEN 3 ========== -->
+  <section id="kitchen3">
+    <div class="section-inner">
+      <div class="story-block self-talk">
+        <span class="character leila-name">Leila</span>
+        Well, I tried didn't I?<br><br>
+        What am I going to eat?..... Yes I know I said that but now I'm hungry!
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She opens some more cabinets, they are all empty. She makes coffee for herself with the
+          remaining hot water and starts drinking it.</p>
+      </div>
+
+      <div class="story-block self-talk">
+        Outside? Nooo...It's raining...You know I wonder, If I go outside, will she remember I did?... Yes she'll
+        forget. I could ran away and I won't be in trouble coz she might even forget about me, right?...no....if I do
+        that then she'll die alone. All alone. That's really sad and I don't want that for her.
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah (O.S.)</span>
+        <p class="dialogue">LEILA!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila rolls her eyes then runs to the bedroom.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== BEDROOM 3 – PHILOSOPHY ========== -->
+  <section id="philosophy">
+    <div class="section-inner">
+      <img src="images/tv-cds.jpg" alt="Old TV and CDs" class="img-full" id="img-tv">
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Where's my coffee?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila looks guilty. She looks over to the kitchen and back to her mother.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">There's none left.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I'll be damned.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila stands at the door awkwardly as the silence falls again. Then Delilah shifts her gaze
+          to her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Why do you talk to yourself child?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">What?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You talk to yourself. I always hear you mumbling things in the kitchen.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Oh. No. No I don't talk to myself.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Do you have imaginary friends that you talk to?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Imaginary friends?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Yes.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">No, no I don't have friends. Imaginary friends.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Then who are you talking to when you're in the kitchen? Are you mad?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I didn't know I was talking to someone. It's just something I do, you know, like make a
+          story in my head and pretend I'm in the story.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">So, you are mad!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">No, I'm not.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Okay come here child...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila slowly walks closer to her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Closer... lay beside me...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She does, awkwardly.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Do you know why I picked you that day?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Because our names rhyme?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Yes Delilah and Leila rhyme,</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She smiles, Leila is now lying on her laps.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I remember when I first saw you...You were just five and you had these big eyes and of all
+          the kids, you were the one who didn't smile at me. And I thought, what's this little shit's fucking problem?
+          Does she not know that I'm the one who can save her from the pitiful life she's about to have? Then I
+          realized, she's just five, what does she know about life. I asked you what your name was and you said Leila,
+          but I can call you whatever I like. What did I say to you?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I will call you Leila, because I like it and it rhymes with my name.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">And then you asked me what my name was.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">And you said DELILAH.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">That shocked you and you said, 'DELILAH? LIKE THE WOMAN WHO CUT SAMSON'S HAIR?', you were so
+          adorable. I told you no, I told you that was a fable. you didn't understand of course, but I had already
+          decided that from that day I would be your mother...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She goes quiet as if she forgot what she was planning to say. Leila gets bored and speaks
+          up.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Mom, I want to go outside maybe I'll find something to eat.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Why do you want to eat?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I'm hungry?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Why are you hungry?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I don't know mom, I JUST AM!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You are hungry because you want to stay alive.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I think I just want pancakes.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">No listen...you never listen to me child....Why do you want to stay alive? Why do you want
+          to go outside? There's nothing there. There's nothing but death there.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">But the voluntering centre has no death there. It has food and there's people and...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I know you find that exciting, God knows how much trouble you gave me when I took you
+          there...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">(quickly interrupts) Please take me again, I promise this time I'll behave and I won't
+          refuse to leave, please please!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You know I don't have the strength to.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Then I can...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">No stay here with me... That place seduces you with food and you think that's what life is
+          about, but it's not. It's just illusion, it masks the death that's underneath it and calls it survival. Do you
+          like staying alive?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Yes?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Really? What is it about life that you like so much? Is it this pathetic world we live in?
+          Is it how you are stuck here and you can't leave? Is it that your mother is dying of cancer and you have to
+          take care of her? Do you like that you have no friends, and not enough food?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila stands up from the bed, angry.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">STOP! I know what you are trying to do! You don't want me to leave because you want me to
+          die here with you and I wont!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Nooo...that's not what I want! A mother wants nothing but life for her child...But there is
+          no life in this world, my dear. The radiation took all of it. Have you ever seen an elephant? Have you ever
+          seen fish? What about flowers? And don't you say you've seen them on movies coz it's not the same.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila's face is shedding tears now.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Okay don't cry, there's no need to cry...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila continues to sob.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">How would you like to watch tv? huh?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila slowly nods.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I know you like that...come on set it up.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila slowly but excitedly goes to where the tv is and switches it on. She takes out a
+          folder with cds and next to it there's headphones and a music player. She takes one of the cds and puts it in
+          the player. She joins her mother in the bed as the movie starts.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">How many times have we seen this movie?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">A lot...I love it.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You know everyone who acted in the movie is dead.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Everyone?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Not a single one is alive.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Mom...why do you always talk about death?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Coz it's all there is now.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">But it's not, you're still alive, I'm still alive.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">We are not alive darling, we just have our eyes open.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I don't...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">When you talk to your imaginary friends or have those fantasies in your head, do you think
+          that's what's happening in the present moment? In the real world?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila turns away from the tv and looks at her mom.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Do you think those thoughts in your head are real? Or are you just making them up?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila is confused.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You think life is like the fantasies in your head? You want to stay alive so that you can
+          keep having these fantasies.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">No...I don't have fantasies.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Oh my poor child.. You are mad and you don't know it...you are mad. You have nothing but
+          thoughts constantly swimming in your head, you make up stories and create ideas that aren't even real... Tell
+          me, can you stop your mind from thinking?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Thinking?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Yes.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Like stop thinking?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Yes!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I can't! That doesn't even make sense.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Why does it not make sense, can you do it or not?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Well, of course I can't. Thinking is what humans should always do. They should think before
+          doing something or saying something.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">What about when you think too much? Do you think you should stop?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">See, you just asked me if I think. Meaning I can't stop thinking.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Okay, fine you can't stop thinking...but what is it you are thinking about?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Right now?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">YES.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I don't know, nothing I guess.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">So you don't know what you are thinking yet you can't stop thinking?...Okay so who is
+          thinking, who is doing the thinking?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I'm the one thinking, it's my brain.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Are you sure? What about when you're talking with your imaginary friends? Is that you doing
+          the thinking or is there someone else.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila gets quiet and contemplates, the tv noise is now in the background.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You are mad. You talk to yourself, you live in a fantasy. You can't control your thoughts
+          and you think that your thoughts and perception of life are the truth but they are not....can't you
+          understand? You are pretending to be alive, you are pretending to be someone you're not, you're pretending to
+          have friends you don't have. You're pretending to be in a story that isn't real....It's all fake! All those
+          thoughts, all those ideas, all those stories, they aren't real.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila isn't reacting, she looks confused. It's as if she's never considered this before.
+        </p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You don't believe me? You think I'm a crazy woman who just always forgets everything...I
+          forget because there's no point in remembering, there's nothing to remember...it's all empty, it's all noise,
+          none of it is real...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She looks at leila who isn't moving.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Leila, where is your mind right now...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila doesn't speak.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Won't you speak?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I...I don't know...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I wish I could live long enough to see the day you would understand what I'm talking about,
+          but how can you, you are just a child.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">A few minutes pass and Delilah falls asleep. Leila sits there, the noise on the tv muffles
+          the background. She finally wakes up and goes to the kitchen.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== AWAKENING ========== -->
+  <section id="awakening">
+    <div class="light-beam" id="beam"></div>
+    <div class="section-inner">
+      <div class="story-block self-talk">
+        <span class="character leila-name">Leila</span>
+        She is crazy, I mean what was that about?...Death always talking about death, if she wants it so bad...
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She stops herself as she gasps in realizaton.</p>
+      </div>
+
+      <div class="story-block self-talk">
+        I'm talking to myself...there's no one here...I'm talking to no one...<br><br>
+        There's nothing happening now... I'm just talking to myself, I'm just imagining it.
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Suddenly the tv noise goes silent, and an eerie quiet settles in. Leila suddenly gains an
+          awareness, she starts to look around her and for the first time she notices the details in the kitchen. The
+          faded white wood that furnished its cabinets. The black kettle that contrasted the white marble sink. The
+          glass plates on the sink. She becomes aware of her body and starts looking at it, from her feet to her hands.
+          To the botched skin she hated so much. The room suddenly gets vivid and she notices the window curtains were
+          closed. She walks toward them, touches their dusty fabric and parts them wide. A bright light illuminates from
+          the window. And she gets so entranced by it, she sheds a tear. She gets this desire to drink it, to drink the
+          light.</p>
+      </div>
+
+      <img src="images/window-light.jpg" alt="Bright light through window" class="img-full detail-reveal"
+        id="img-light">
+
+      <div class="story-block">
+        <p class="narration">Suddenly, she hears a bird singing, and the life that's outside her window. The buildings
+          are rampaged, and the city is abandoned in post war architecture. She sees a red ladybug in a corner somewhere
+          and gets fascinated by it. The breeze touches her skin and she shivers in a way that looks pleasurable. She
+          closes her eyes and another desire comes. She wants the breeze to carry her to wherever it's going.</p>
+      </div>
+
+      <img src="images/ladybug.jpg" alt="Red ladybug" class="img-full detail-reveal" id="img-ladybug">
+
+      <div class="story-block">
+        <p class="narration">She opens her eyes after the breeze leaves. An awareness creeps in, we see it in her eyes.
+          She moves away from the window and walks to her mother's bedroom, carrying that same awareness.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CONFRONTATION ========== -->
+  <section id="confrontation">
+    <div class="section-inner">
+      <img src="images/leila-eyes.jpg" alt="Leila's eyes" class="img-full" id="img-eyes">
+
+      <div class="story-block">
+        <p class="narration">She stops at the door, she looks around the room, at the tv, at the bed. She looks at her
+          mother for the first time. She really looks at her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">MOM?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Delilah opens her eyes. Leila walks closer but stops just before reaching the bed.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I'm leaving!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Not this again!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">No! I'm serious.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She walks towards her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I finally understand what you meant...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She sits down and looks at her mother straight in the eyes. This startles Delilah.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I have been fantasizing about life, it was all in my head. My dreams, my thoughts, my
+          feelings...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">What has happened?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Delilah looks at the new person sitting next to her. She has these big eyes that looked
+          like they just witnessed a miracle.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I'm leaving you...You are dying and you seem to be fine with that. But I don't want to die,
+          I want to live. And yes I have never seen an elephant coz there's no life out there but just now I saw a
+          ladybug and it's the most beautiful thing I have ever laid my eyes upon. I know there's not much out there,
+          but if something like that ladybug is out there then that's where I want to be. I want to live and see many
+          more ladybugs and I can't do that here.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Stop this nonsense.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue scream-echo" id="scream">I AM SERIOUS! THIS ISN'T NONSENSE. I AM LEAVING AND YOU WILL NEVER
+          EVER SEE ME AGAIN!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">AND WHERE WILL YOU GO?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">ANYWHERE THAT'S NOT HERE!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">YOU'RE FUCKING DELUSIONAL</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I DON'T CARE!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She screams, like all her breath came out with those words. The echo of her scream takes
+          its time in the room, then disappears. Delilah softens.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Okay, if you want to go to the volunteering center, you can go. I have given you permission.
+          Bring lots of bread, not the scones.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila looks confused, her outburst hasn't cooled off yet.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Really?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Yeah...Just make sure you come back before night falls.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila stands up excited. She hugs her mother.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">OH thank you thank you thank you!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Delilah hugs her back, smiling. Leila breaks the hug and starts to leave.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Before you go, can you apply that lotion on me.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila looks at the lotion standing next to her mother's bedside table. This is the lotion
+          they all apply to help neutralize the effects of the radiation. She fights the urge to walk out and picks up
+          the lotion instead.<br><br>
+          She begins applying the lotion to her mother's skin.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Since you are going to the center, do you remember the way there?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I think so.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You don't remember. Aren't you going to get lost?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I won't.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">What if the center is closed?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila stops applying the lotion. She looks at Delilah and finally understands what was
+          happening. She gets up and distances herself from her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">What now?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila starts pacing around the bedroom, trying to find the words that best describe her
+          feelings.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You are a selfish person...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">What?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You are a selfish person, you're so selfish....You don't want me to go. Well I will and you
+          can't stop me. I'm leaving and I'm never coming back!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">There's a pause as Delilah tries to understand the situation.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You want to abandon me?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Yes! You want to die, I'm not going to...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">(interrupts) Why don't you just kill me? Kill me and get your freedom.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">What? Why are you...</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">No go ahead, Kill me. I have given you permission. Kill me. Do it, God will forgive you. In
+          fact who am I kidding, he doesn't care if you do it. So go ahead, kill me and go to that place you like so
+          much.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila walks to the door. Delilah gets irrational and starts shouting at her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Kill me you fucking coward!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila turns around and walks towards her.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You know what I just realized...you didn't pick me because our names rhymed or you liked me
+          and wanted to care for me. You picked me because you didn't want to live alone, and what better way than to
+          adopt an unwanted child from the orphanage right?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">I picked you coz you needed me, you needed a mother.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You were never my mother, I was just a maid to you, a companion you can order around and
+          tell stories about your past to. You were never my mother!</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Delilah is in shock, there's a creeping block in her emotions and she can't remove it. She
+          can't believe this is happening.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">You won't survive out there.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">Let me worry about that...</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila walks to the door but stops and turns around again.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">you know...now that I think or now that I see things more clearly, I don't know why I was so
+          afraid. Of you, of outside and of life. Nothing's ever happened to me, yet I have always been scared and
+          anxious. I'm still alive after all this time, all the things I have feared, none of them ever happened, all
+          the things I've wished for, they never happened. It was all in my head. It was all in my head!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">YES! It was all in your head! That's what I have been telling you all this fucking time. But
+          just because you finally know that, doesn't mean you have the power to live life the way you want it. You
+          don't, you are weak, life will swallow you up and spit you out, over and over again...Oh you think because the
+          illusion has gone, life will suddenly start to favor you? Because you're aware now? Because you're
+          enlightened?</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">I don't know what you're talking about and I don't care.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Of course you don't, you're just in the beginning. I'll tell you what, you can go, you can
+          leave. Go have a life... And one day, you will realize that I was never your enemy, I was never the one
+          holding you prisoner.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You can't talk me out of it. I know you think I hate you but I don't.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Bullshit! You think I've never heard you debate with yourself whether or not you should kill
+          me?</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila is taken aback!</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">Haha! You mad child, your echoes reach this room all the time...But you know what, I wanted
+          you to do it. God how I waited for you to do it, to take me out of my misery, if I had the strength to move my
+          hands I would have done it already. Unlike you, you are such a fucking coward, you'd rather wipe my shit than
+          put a knife to my chest.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">Leila feels a weird emotion swelling inside her chest. She doesn't know what it is.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character delilah-name">Delilah</span>
+        <p class="dialogue">And somehow you think you can survive out there? When you can't do something as simple as
+          that? When you can't even slay the witch who is the only mother you'll ever have? That's right, I'm the only
+          mother you'll ever have, because the one who gave birth to you, didn't want you. And If I'm honest, I don't
+          blame her, look at you. You're an ugly child. I bet if she knew how ugly and mad you'd turn out to be, she
+          wouldn't have given birth to you in the first place.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">The emotion that was swelling in Leila's chest, like a lightning bolt, ascends to her head
+          and takes away every thought in her brain. Then it takes over her body, and she moves to the bed, jumping on
+          top of it. She yanks one of the pillows and with a strength only seen in animals, she places the pillow over
+          the witch's face. She pushes the pillow down and down. Her mother's frail body fights back but Leila continues
+          pushing. Down and Down. The body keeps moving. Down and Down she pushes. Down and Down until finally the witch
+          no longer moves.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">The emotion subsides as quickly as it had ascended, and Leila's eyes are no longer blinded
+          by it. She takes away the pillow from her mother's face.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">The witch's dead face doesn't surprise her. It still has the same dead hazel eyes that
+          always looked down on her. Leila gets up from the bed.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You wanted to die...so there...you're welcome.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She walks away to the door and through the corridor to her room.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ESCAPE ========== -->
+  <section id="escape">
+    <div class="section-inner">
+      <img src="images/suitcase.jpg" alt="Suitcase" class="img-full" id="img-suitcase">
+
+      <div class="story-block">
+        <p class="narration">She opens her wardrobe. There's a suitcase there. She lifts the suitcase up and rolls it on
+          the floor, walking to her late mother's room.</p>
+      </div>
+
+      <div class="story-block">
+        <span class="character leila-name">Leila</span>
+        <p class="dialogue">You don't know how long I've been waiting for this.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She looks at her dead mother once more. She tries to feel something in her heart, but just
+          like her head, there's nothing there. Her eyes catch the headphones and the music player that's next to the tv
+          desk. The movie in the tv is now showing the credit sequence. She walks to the desk and picks up the
+          headphones and music player. It was an old one, a gift she got at the orphange from someone she no longer
+          remembers. She puts the headphones on and connects the wire to the player. She scrolls through the catalogue
+          of music displayed on the small device and presses play on one of them.</p>
+      </div>
+
+      <img src="images/headphones.jpg" alt="Old headphones and music player" class="img-full" id="img-music">
+
+      <div class="story-block">
+        <p class="narration">The music starts, she walks to her mother, takes a blanket and covers her body. Then she
+          takes her suitcase and drags it out of the apartment. The outside looked the same way as she had always seen
+          it from the window. But now it felt different. She begins walking away from the old house she had called home
+          for over a decade. The music is almost at a climax and Leila can feel it in her bones. The freedom in her
+          bones. As she walked further away and into the unknown, she started dancing and singing to the music.
+          Laughing, Jumping.</p>
+      </div>
+
+      <div class="story-block">
+        <p class="narration">She almost looked mad while doing it.</p>
+      </div>
+
+      <div class="freedom-text" id="freedom">It was all in my head.</div>
+
+      <div class="dance" id="dance">
+        <span>✦</span><span>✦</span><span>✦</span>
+      </div>
+
+      <img src="images/leila-walking.jpg" alt="Leila walking into the ruins" class="img-full" id="img-walking">
+    </div>
+  </section>
+
+  <!-- ========== FINAL ========== -->
+  <section class="final" id="final">
+    <h2 id="final-title">Ladybug</h2>
+  </section>
+  <script src="script.js"></script>
 </body>
+
 </html>
